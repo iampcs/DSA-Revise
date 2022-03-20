@@ -199,4 +199,57 @@ public class FixedWindowSize {
         }
         return solution;
     }
+
+    /*
+        Sliding Window Maximum - You are given an array of integers nums, there is a sliding window of size k which is moving from the very left of the array to the very right.
+        You can only see the k numbers in the window. Each time the sliding window moves right by one position.
+        Return the max sliding window.
+        https://leetcode.com/problems/sliding-window-maximum/
+     */
+    public int[] maxSlidingWindow(int[] nums, int k) {
+        int[] solution = new int[nums.length -k + 1];
+        int start=0,end = 0;
+        // Just like printFirstNegativeInteger question, we will be maintaining a special queue which always fetch us
+        // maximum number in current window - We need to maintain this queue
+        //This queue contains indexes only - not actual numbers
+        ArrayDeque<Integer> queue = new ArrayDeque<>();
+
+        while(end < nums.length){
+            //Add input[end] to window
+            //When we are adding a number and its greater than its elements on left, we don't need those elements anymore
+            //Those elements will never be part of solution going forward as we have a greater element present right of them.
+            //So remove those elements
+            while(!queue.isEmpty() && nums[end] >= nums[queue.getLast()]) {
+                queue.removeLast();
+            }
+            queue.addLast(end);
+
+            //Did we reached window size?
+            if(end-start+1 < k){
+                //just increment window size
+                end++;
+            }
+            //We reached window size
+            else if(end-start+1 == k){
+                //Calculate Solution
+                solution[start] = nums[queue.getFirst()];
+                //Increment window size
+                end++;
+            }
+            //We have gone beyond window size now - slide window, make adjustments before sliding
+            else{
+                //If start contains the max number for current window, remove start from queue - now second largest number
+                // will be the max for current queue
+                if(start == queue.getFirst()) queue.removeFirst();
+
+                //Slide Window
+                start++;
+                end++;
+                //Now that the window is of size K again, we have a solution - position of solution changes based on
+                // if we are using start index as part of our solution.
+                solution[start] = nums[queue.getFirst()];
+            }
+        }
+        return solution;
+    }
 }
