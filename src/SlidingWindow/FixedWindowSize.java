@@ -25,6 +25,7 @@ Template:
 
  */
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 
 public class FixedWindowSize {
@@ -47,7 +48,7 @@ public class FixedWindowSize {
             // Add input[end] to window
             currentSum = currentSum + Arr.get(end);
 
-            //Did we reached window size? (end++)
+            //Did we reached window size?
             if(end - start + 1 < K){
                 //just increment window size
                 end++;
@@ -68,6 +69,54 @@ public class FixedWindowSize {
 
                 //Slide window
                 start++;
+                end++;
+            }
+        }
+
+        return solution;
+    }
+
+    /* First negative integer in every window of size k - Given an array A[] of size N and a positive integer K,
+    find the first negative integer for each and every window(contiguous subarray) of size K.
+    https://practice.geeksforgeeks.org/problems/first-negative-integer-in-every-window-of-size-k3345/1
+    */
+    public long[] printFirstNegativeInteger(long A[], int N, int K)
+    {
+        long[] solution = new long[N-K+1];
+        //We are maintaining a queue to store possible solutions
+        // Will be storing indexed instead of numbers itself - makes it easy in case of duplicate numbers
+        ArrayDeque<Integer> possibleSolutions = new ArrayDeque<>();
+        int start = 0, end = 0;
+
+        while(end < N){
+
+            //Only adding negative numbers to possible solutions
+            if(A[end] < 0){
+                possibleSolutions.addLast(end);
+            }
+            //Did we reached window size?
+            if(end - start + 1 < K){
+                //just increment window size
+                end++;
+            }
+            //We reached window size
+            else if(end - start + 1 == K){
+                //Calculate solution
+                solution[start] = possibleSolutions.isEmpty() ? 0 : A[possibleSolutions.getFirst()];
+                //Increment window size
+                end++;
+            }
+            //We have gone beyond window size now - slide window, make adjustments
+            else {
+                // Is start part of possible solution? If yes, remove start.
+                if(!possibleSolutions.isEmpty() && start == possibleSolutions.getFirst()){
+                    possibleSolutions.removeFirst();
+                }
+                //Slide window
+                start++;
+                //Now that the window is of size K again, we have a solution
+                solution[start] = possibleSolutions.isEmpty() ? 0 : A[possibleSolutions.getFirst()];
+
                 end++;
             }
         }
