@@ -11,16 +11,12 @@ Template:
 1. Data structure to contain solution + Supporting data structure
 2. start and end of window pointers initialized to 0
 3. While window has not reached end of input array - end < input.length
-    3.1. Add input[end] to window
+    3.1. Add input[end] to window - Do required calculations to supporting data structure
     3.2. Did we reached window size? (end - start + 1) < K - just increment window size(end++) and continue
     3.3. We reached window size (end - start + 1) == K is true -
         3.3.1. Calculate solution for current window
-        3.3.2. Increment window size(end++) and continue;
-    3.4. We have gone beyond window size now -  (end - start + 1) > K - Slide the window
-        3.4.1. Remove input[start] from window - This can be a single operation or a series of operations
-        3.4.2. <Optional> Make required modifications with Supporting Data Structure - if any
-        3.4.3. <Optional> Check if we got a new solution
-        3.4.4. Slide Window -  start++ , end++
+        3.3.2. Remove input[start] from window - This can be a single calculation or a series of calculations to supporting data structure
+        3.3.3. Slide Window -  start++ , end++ - maintain window size
 4. Return solution
 
  */
@@ -38,7 +34,7 @@ public class FixedWindowSize {
     /*
     Max Sum Subarray of size K - Given an array of integers Arr of size N and a number K.
     Return the maximum sum of a subarray of size K.
-    https://practice.geeksforgeeks.org/problems/max-sum-subarray-of-size-k5313
+    https://practice.geeksforgeeks.org/problems/max-sum-subarray-of-size-k5313/1
     Hint: Rolling Sum
     */
     static int maximumSumSubarray(int K, ArrayList<Integer> Arr, int N){
@@ -59,15 +55,9 @@ public class FixedWindowSize {
             else if(end - start + 1 == K){
                 //Calculate solution
                 solution = Math.max(solution,currentSum);
-                //Increment window size
-                end++;
-            }
-            //We have gone beyond window size now - slide window, make adjustments
-            else {
+
                 //Removed start index contribution as we are sliding the window to right
                 currentSum = currentSum - Arr.get(start);
-                //We might get a new solution as array size is again K
-                solution = Math.max(solution,currentSum);
 
                 //Slide window
                 start++;
@@ -106,20 +96,14 @@ public class FixedWindowSize {
             else if(end - start + 1 == K){
                 //Calculate solution
                 solution[start] = possibleSolutions.isEmpty() ? 0 : A[possibleSolutions.getFirst()];
-                //Increment window size
-                end++;
-            }
-            //We have gone beyond window size now - slide window, make adjustments
-            else {
+
                 // Is start part of possible solution? If yes, remove start.
                 if(!possibleSolutions.isEmpty() && start == possibleSolutions.getFirst()){
                     possibleSolutions.removeFirst();
                 }
+
                 //Slide window
                 start++;
-                //Now that the window is of size K again, we have a solution
-                solution[start] = possibleSolutions.isEmpty() ? 0 : A[possibleSolutions.getFirst()];
-
                 end++;
             }
         }
@@ -177,11 +161,7 @@ public class FixedWindowSize {
             else if(end - start + 1 == inputAnagram.length){
                 //Calculate solution
                 if(charCount == 0) solution++;
-                //Increment window size
-                end++;
-            }
-            //We have gone beyond window size now - slide window, make adjustments
-            else{
+
                 // Is start part of initial map? If yes, it means we need to replace that character going forward.
                 // We need one more instance of that character as start is getting removed now.
                 if(map.containsKey(inputString[start])) {
@@ -189,13 +169,11 @@ public class FixedWindowSize {
                     //We only increase charCount if character frequency changes from 0<->Non-Zero
                     if(map.get(inputString[start]) == 1) charCount++;
                 }
-                //Now that the window is of size K again, we have a solution
-                if(charCount == 0) solution++;
+
                 //Slide window
                 start++;
                 end++;
             }
-
         }
         return solution;
     }
@@ -233,11 +211,7 @@ public class FixedWindowSize {
             else if(end-start+1 == k){
                 //Calculate Solution
                 solution[start] = nums[queue.getFirst()];
-                //Increment window size
-                end++;
-            }
-            //We have gone beyond window size now - slide window, make adjustments before sliding
-            else{
+
                 //If start contains the max number for current window, remove start from queue - now second largest number
                 // will be the max for current queue
                 if(start == queue.getFirst()) queue.removeFirst();
@@ -245,9 +219,6 @@ public class FixedWindowSize {
                 //Slide Window
                 start++;
                 end++;
-                //Now that the window is of size K again, we have a solution - position of solution changes based on
-                // if we are using start index as part of our solution.
-                solution[start] = nums[queue.getFirst()];
             }
         }
         return solution;
