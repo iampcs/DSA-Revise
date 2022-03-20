@@ -27,10 +27,11 @@ Template:
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FixedWindowSize {
     public static void main(String[] args) {
-
 
     }
 
@@ -38,6 +39,7 @@ public class FixedWindowSize {
     Max Sum Subarray of size K - Given an array of integers Arr of size N and a number K.
     Return the maximum sum of a subarray of size K.
     https://practice.geeksforgeeks.org/problems/max-sum-subarray-of-size-k5313
+    Hint: Rolling Sum
     */
     static int maximumSumSubarray(int K, ArrayList<Integer> Arr, int N){
         int solution = 0;
@@ -79,6 +81,7 @@ public class FixedWindowSize {
     /* First negative integer in every window of size k - Given an array A[] of size N and a positive integer K,
     find the first negative integer for each and every window(contiguous subarray) of size K.
     https://practice.geeksforgeeks.org/problems/first-negative-integer-in-every-window-of-size-k3345/1
+    Hint: Maintain Queue of possible solutions
     */
     public long[] printFirstNegativeInteger(long A[], int N, int K)
     {
@@ -121,6 +124,79 @@ public class FixedWindowSize {
             }
         }
 
+        return solution;
+    }
+
+    /*
+    Count Occurrences of Anagrams - Given a word pat and a text txt.
+    Return the count of the occurrences of anagrams of the word in the text.
+    https://practice.geeksforgeeks.org/problems/count-occurences-of-anagrams5839/1#
+    Hint: Main HashMap to track charater occurrences
+    */
+    static int countAnagrams(String pat, String txt) {
+        int solution = 0;
+        int start=0,end = 0;
+        //HashMap will store character-frequency in pattern.
+        //Idea is to increment/decrement frequency in map as we parse txt and increase window size
+        //If all the frequencies are zero means - we got all the characters required.
+        Map<Character,Integer> map = new HashMap<>();
+        //Faster than String.charAt()
+        char[] inputString = txt.toCharArray();
+        char[] inputAnagram = pat.toCharArray();
+
+        for(Character ch:inputAnagram){
+            if(map.containsKey(ch)) map.put(ch, map.get(ch) + 1);
+            else map.put(ch,1);
+        }
+        //Maintaining this variable saves us time. We know we have an anagram if character-frequency matches with pattern.
+        //In that case frequency will be 0 for all the characters we have a anagram. Instead of checking map for all the frequencies
+        //we are maintaining this charCount to track number of zero frequencies character
+        int charCount  = map.size();
+
+
+        while(end < inputString.length){
+
+            // We are only concerned when we encounter a character already part of map - part of pattern
+            if(map.containsKey(inputString[end])) {
+                //We now have one instance of character in our window, so required character is reduced by one
+                map.put(inputString[end], map.get(inputString[end]) - 1);
+                //If frequency becomes zero - it means now we have all the instances of character required in our window
+                //Now we need one character less than before
+                if(map.get(inputString[end]) == 0){
+                    //We only decrease charCount if character frequency changes from Non-Zero<->0
+                    charCount--;
+                }
+
+            }
+            //Did we reached window size?
+            if(end - start + 1 < inputAnagram.length){
+                //just increment window size
+                end++;
+            }
+            //We reached window size
+            else if(end - start + 1 == inputAnagram.length){
+                //Calculate solution
+                if(charCount == 0) solution++;
+                //Increment window size
+                end++;
+            }
+            //We have gone beyond window size now - slide window, make adjustments
+            else{
+                // Is start part of initial map? If yes, it means we need to replace that character going forward.
+                // We need one more instance of that character as start is getting removed now.
+                if(map.containsKey(inputString[start])) {
+                    map.put(inputString[start], map.get(inputString[start]) + 1);
+                    //We only increase charCount if character frequency changes from 0<->Non-Zero
+                    if(map.get(inputString[start]) == 1) charCount++;
+                }
+                //Now that the window is of size K again, we have a solution
+                if(charCount == 0) solution++;
+                //Slide window
+                start++;
+                end++;
+            }
+
+        }
         return solution;
     }
 }
