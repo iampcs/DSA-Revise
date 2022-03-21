@@ -1,7 +1,9 @@
 package SlidingWindow;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /*
 Identify a Sliding window problem :
@@ -37,7 +39,7 @@ public class VariableWindowSize {
        If there is no possible substring then print -1.
        https://practice.geeksforgeeks.org/problems/longest-k-unique-characters-substring0853/1#
     */
-    public static int longestkSubstr(String s, int k) {
+    public static int longestKSubstr(String s, int k) {
 
         int solution = -1;
         int start=0,end=0;
@@ -74,6 +76,7 @@ public class VariableWindowSize {
             }
             //We have gone beyond condition now -  present-condition > K
             else{
+                //while condition is not equal or less than it
                 while(uniqueCharacterCount > k){
                     //Remove input[start] from window
                     uniqueCharacterMap.put(s.charAt(start), uniqueCharacterMap.get(s.charAt(start)) - 1);
@@ -86,6 +89,47 @@ public class VariableWindowSize {
             }
         }
 
+        return solution;
+    }
+
+    /*
+        Longest Substring Without Repeating Characters - Given a string s, find the length of the longest substring without repeating characters.
+        https://leetcode.com/problems/longest-substring-without-repeating-characters/
+        Here we have only two conditions - while adding a new element to window - either our condition of all unique characters
+        still holds true or we have gone beyond condition and need to adjust window
+    */
+    public static int lengthOfLongestSubstring(String s) {
+        int solution = 0;
+        //We are using a set here to quantify condition
+        Set<Character> set = new HashSet<>();
+        int start = 0;
+        int end = 0;
+        char[] stringArray = s.toCharArray();
+
+        while(end < stringArray.length ){
+            //Add input[end] to window - check Set to see if condition still holds true
+            if(!set.contains(stringArray[end])){
+                set.add(stringArray[end]);
+                //Calculate solution for current window
+                solution = Math.max(solution, end - start + 1);
+                //Increment window size
+                end++;
+            }
+            //We have gone beyond condition now -  our window contains a duplicate character
+            else{
+                //Start removing character until our condition is true again
+                while(stringArray[start] != stringArray[end]) {
+                    //Remove input[start] from window
+                    set.remove(stringArray[start]);
+                    start++;
+                }
+                //start contains the first duplicate character now, our window will start from next index now
+                start ++;
+                //Slide Window rear
+                end++;
+            }
+
+        }
         return solution;
     }
 }
