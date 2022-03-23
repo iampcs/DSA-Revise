@@ -1,9 +1,9 @@
 package SlidingWindow;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.*;
 
 /*
 Identify a Sliding window problem :
@@ -30,7 +30,7 @@ Template:
 
  */
 public class VariableWindowSize {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
     }
 
@@ -131,5 +131,71 @@ public class VariableWindowSize {
 
         }
         return solution;
+    }
+
+    /*
+        Minimum Window Substring - Given two strings s and t of lengths m and n respectively, return the minimum window substring of s such that every character in t (including duplicates) is included in the window.
+        If there is no such substring, return the empty string "". Answer will be unique.
+        https://leetcode.com/problems/minimum-window-substring/
+    */
+
+    public static String minWindow(String s, String t) {
+        int start=0,end=0;
+        int solutionStart=-1,endSolution=-1,solutionLength = Integer.MAX_VALUE;
+        // We are using two hashMaps here , one to store Character frequency in t and one to store character frequency in current window
+        Map<Character,Integer> charFrequency = new HashMap<>();
+        for(Character ch : t.toCharArray()) {
+            if(charFrequency.containsKey(ch)) charFrequency.put(ch, charFrequency.get(ch) + 1);
+            else charFrequency.put(ch,1);
+        }
+        //How many unique characters are there in t
+        int charToMatch = charFrequency.size();
+
+        Map<Character,Integer> windowMap = new HashMap<>();
+        //How many characters matched till now in current window
+        int charMatch = windowMap.size();
+
+        while (end < s.length()){
+            //Add to window hashmap only if its only if its required - ignore those characters not there in t
+            if(charFrequency.containsKey(s.charAt(end))){
+                if(windowMap.containsKey(s.charAt(end)))
+                    windowMap.put(s.charAt(end), windowMap.get(s.charAt(end)) + 1);
+                else windowMap.put(s.charAt(end), 1);
+
+                //If we have matched all instances of a character
+                //Use equals when matching Integer,Character,Double etc, == matches reference and can be wrong
+                //https://leetcode.com/problems/minimum-window-substring/discuss/266059/Why-you-failed-the-last-test-case%3A-An-interesting-bug-when-I-used-two-HashMaps-in-Java
+                if(windowMap.get(s.charAt(end)).equals(charFrequency.get(s.charAt(end)))){
+                    charMatch++;
+                }
+            }
+            // We have the solution now, can we reduce its solution size without breaking condition ?
+            // Here even after we have reached our condition, there is still scope for a new solution, if there is a new solution available
+            //means we have actually crossed our condition - Hence slide the window
+            while(charMatch == charToMatch){
+                if(end - start + 1 < solutionLength){
+                    solutionLength = end - start + 1;
+                    endSolution = end;
+                    solutionStart = start;
+                }
+
+                if(windowMap.containsKey(s.charAt(start))){
+                    //Post this if we reduce, we will be short of an instance of a character, hence reducing character matched
+                    if(windowMap.get(s.charAt(start)).equals(charFrequency.get(s.charAt(start)))){
+                        charMatch--;
+                    }
+                    windowMap.put(s.charAt(start), windowMap.get(s.charAt(start)) - 1);
+
+                }
+                //Slide window front
+                start++;
+            }
+            //Slide Window rear
+            end++;
+
+        }
+
+        return solutionStart == -1 ? "" : s.substring(solutionStart,endSolution+1);
+
     }
 }
