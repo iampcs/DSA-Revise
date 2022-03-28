@@ -177,4 +177,43 @@ public class NonSortedArray {
         }
         return solution;
     }
+
+    /*
+    Frequency Sort - Sort Array by Increasing Frequency - If multiple values have the same frequency, sort them in decreasing order.
+    https://leetcode.com/problems/sort-array-by-increasing-frequency/
+     */
+    class customComparator implements Comparator<int[]> {
+
+        @Override
+        public int compare(int[] o1, int[] o2) {
+            // We need decreasing order if frequency is same
+            if(o1[1] == o2[1]) return o2[0] - o1[0];
+
+            return o1[1] - o2[1];
+        }
+    }
+    public int[] frequencySort(int[] nums) {
+        int[] solution = new int[nums.length];
+        //Here we don't have K, we want minimum frequency elements to come first - for that they have to be on top, hence minHeap
+        PriorityQueue<int[]> minHeap = new PriorityQueue<>(new customComparator());
+        // Frequency Map
+        Map<Integer,Integer> map = new HashMap<>();
+        for(int num : nums) map.put(num, map.getOrDefault(num, 0) + 1);
+        //Add frequencyMap to minHeap
+        for(Map.Entry<Integer,Integer> instance : map.entrySet()){
+            minHeap.add(new int[]{instance.getKey(), instance.getValue()});
+        }
+
+        //Create solution array from minHeap
+        int solutionIndex = 0;
+        while (minHeap.size()> 0){
+            int[] res = minHeap.remove();
+            int freq = res[1];
+            while(freq-- > 0 ){
+                solution[solutionIndex++] = res[0];
+            }
+        }
+
+        return solution;
+    }
 }
