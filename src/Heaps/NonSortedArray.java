@@ -17,6 +17,7 @@ Scenario : Suppose we need Kth largest element. We have two choice
 */
 
 
+import javax.swing.text.html.parser.Entity;
 import java.util.*;
 
 public class NonSortedArray {
@@ -249,6 +250,33 @@ public class NonSortedArray {
     Reorganize String - Given a string s, rearrange the characters of s so that any two adjacent characters are not the same.
     https://leetcode.com/problems/reorganize-string/
     */
+    public static String reorganizeString(String s) {
+
+        StringBuilder solution = new StringBuilder();
+        // Frequency Map
+        Map<Character,Integer> map = new HashMap<>();
+        for (Character ch : s.toCharArray()) map.put(ch, map.getOrDefault(ch,0) + 1);
+        //We will use the character with most frequency alternatively to create a solution string - character with max frequency will be on top
+        PriorityQueue<Map.Entry<Character,Integer>> maxHeap = new PriorityQueue<>((a,b) -> b.getValue() - a.getValue());
+        for(Map.Entry<Character,Integer> entry : map.entrySet()) maxHeap.add(entry);
+
+        //In each step we append one occurrence of the highest frequency character to the output string
+        //We will not put this character back in the heap to ensure that no two same characters are adjacent to each other.
+        Map.Entry<Character,Integer> prevEntry = null;
+        while (maxHeap.size() > 0){
+            // Get current max frequency character
+            Map.Entry<Character,Integer> currEntry = maxHeap.poll();
+            //Add previous max frequency character if applicable
+            if(prevEntry != null && prevEntry.getValue() > 0) maxHeap.add(prevEntry);
+
+            solution.append(currEntry.getKey());
+            //Reduce frequency by 1, as we have used it in our solution
+            currEntry.setValue(currEntry.getValue() - 1);
+            //Store this character to be added back to maxHeap on next iteration
+            prevEntry = currEntry;
+        }
+        return solution.length() == s.length() ? solution.toString() : "";
+    }
 
     /*
     Rearrange String K Distance Apart - Given a string and a number ‘K’, find if the string can be rearranged such that the same characters are at least ‘K’ distance apart from each other.
