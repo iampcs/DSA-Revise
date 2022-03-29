@@ -21,7 +21,8 @@ import java.util.*;
 
 public class NonSortedArray {
     public static void main(String[] args) {
-
+        int[] arr = new int[]{4,3,1,1,3,3,2};
+        System.out.println(findLeastNumOfUniqueInts(arr,3));
     }
 
     /*
@@ -213,7 +214,54 @@ public class NonSortedArray {
                 solution[solutionIndex++] = res[0];
             }
         }
-
         return solution;
     }
+    /*
+        Least Number of Unique Integers after K Removals
+        https://leetcode.com/problems/least-number-of-unique-integers-after-k-removals/
+    */
+    public static int findLeastNumOfUniqueInts(int[] arr, int k) {
+
+        // Frequency Map
+        Map<Integer,Integer> map = new HashMap<>();
+        for(int num : arr) map.put(num, map.getOrDefault(num, 0) + 1);
+
+        //We want the one with the least frequency to be on top, so we can remove those elements first
+        PriorityQueue<int[]> minHeap = new PriorityQueue<>((a,b) -> a[1] - b[1]);
+
+        // Add frequency map tp minHeap
+        for(Map.Entry<Integer,Integer> entry : map.entrySet()) minHeap.add(new int[]{entry.getKey(), entry.getValue()});
+
+        //Remove the elements with the least frequencies first until k > 0. Add it back to heap if K is exhausted.
+        while (k > 0){
+            int[] popped = minHeap.poll();
+            if (k < popped[1]) {
+                minHeap.add(new int[]{popped[0], popped[1] - k});
+            }
+            k = k - popped[1];
+        }
+
+        return minHeap.size();
+
+    }
+
+    /*
+    Reorganize String - Given a string s, rearrange the characters of s so that any two adjacent characters are not the same.
+    https://leetcode.com/problems/reorganize-string/
+    */
+
+    /*
+    Rearrange String K Distance Apart - Given a string and a number ‘K’, find if the string can be rearranged such that the same characters are at least ‘K’ distance apart from each other.
+    https://www.lintcode.com/problem/907/
+    */
+
+    /*
+    Task Scheduler
+    https://leetcode.com/problems/task-scheduler/
+    */
+
+    /*
+    Maximum Frequency Stack - Design a stack-like data structure to push elements to the stack and pop the most frequent element from the stack.
+    https://leetcode.com/problems/maximum-frequency-stack/
+    */
 }
