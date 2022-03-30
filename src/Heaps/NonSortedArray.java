@@ -281,13 +281,86 @@ public class NonSortedArray {
     /*
     Rearrange String K Distance Apart - Given a string and a number ‘K’, find if the string can be rearranged such that the same characters are at least ‘K’ distance apart from each other.
     https://www.lintcode.com/problem/907/
+    This problem is similar to reorganizeString, only difference is that in the reorganizeString the same characters need not be adjacent i.e.,
+    they should be at least ‘2’ distance apart while in the current problem, the same characters should be ‘K’ distance apart.
+    We will follow similar approach, we will re-insert the character after ‘K’ iterations.
     */
+    public static String rearrangeString(String s, int k) {
+        StringBuilder solution = new StringBuilder();
+        // Frequency Map
+        Map<Character,Integer> map = new HashMap<>();
+        for (Character ch : s.toCharArray()) map.put(ch, map.getOrDefault(ch,0) + 1);
+        //We will use the character with most frequency every K iteration to create a solution string - character with max frequency will be on top
+        PriorityQueue<Map.Entry<Character,Integer>> maxHeap = new PriorityQueue<>((a,b) -> b.getValue() - a.getValue());
+        for(Map.Entry<Character,Integer> entry : map.entrySet()) maxHeap.add(entry);
 
+        //In each step we append one occurrence of the highest frequency character to the output string
+        //We will not put this character back in the heap to ensure that no two same characters are adjacent to each other.
+        Queue<Map.Entry<Character,Integer>> prevEntires = new LinkedList<>();
+        while (maxHeap.size() > 0){
+            // Get current max frequency character
+            Map.Entry<Character,Integer> currEntry = maxHeap.poll();
+
+            solution.append(currEntry.getKey());
+            //Reduce frequency by 1, as we have used it in our solution
+            currEntry.setValue(currEntry.getValue() - 1);
+
+            //Add previous max frequency characters to queue
+            prevEntires.add(currEntry);
+            //Now that we have K entries in queue, we can use the same character again, adding it back to heap
+            //If frequency is greater than 0
+            if(prevEntires.size() == k){
+                Map.Entry<Character,Integer> prevEntry = prevEntires.poll();
+                if(prevEntry.getValue() > 0) maxHeap.add(prevEntry);
+            }
+        }
+        return solution.length() == s.length() ? solution.toString() : "";
+    }
     /*
     Task Scheduler
     https://leetcode.com/problems/task-scheduler/
+    This problem is similar to rearrangeString. We need to rearrange tasks such that same tasks are ‘K’ distance apart.
+    We will use a maxHeap to execute the highest frequency task first. After executing a task we decrease its frequency and put it in a
+    waiting list. In each iteration, we will try to execute as many as k+1 tasks.
+    For the next iteration, we will put all the waiting tasks back in the maxHeap.
+    If, for any iteration, we are not able to execute k+1 tasks, the CPU has to remain idle for the remaining time in the next iteration.
     */
+    public int leastInterval(char[] tasks, int K) {
+        int solution = 0;
+        // Frequency Map
+        Map<Character,Integer> map = new HashMap<>();
+        for (Character ch : tasks) map.put(ch, map.getOrDefault(ch,0) + 1);
+        //We will use the character with most frequency every K iteration to create a solution - character with max frequency will be on top
+        PriorityQueue<Map.Entry<Character,Integer>> maxHeap = new PriorityQueue<>((a,b) -> b.getValue() - a.getValue());
+        for(Map.Entry<Character,Integer> entry : map.entrySet()) maxHeap.add(entry);
 
+
+        while (maxHeap.size() > 0){
+            List<Map.Entry<Character,Integer>> coolDownList = new ArrayList<>();
+            //Including the character itself, next time it will come after K+1 iterations.
+            //[A,B,A,C], K=2 -> [A,B,C,A]
+            int n = K + 1;
+
+            for(;n>0 && !maxHeap.isEmpty(); n--){
+                // Get current max frequency character
+                Map.Entry<Character,Integer> currEntry = maxHeap.poll();
+                //Add it to solution
+                solution++;
+                //Only if frequency is left we are interested in it
+                if(currEntry.getValue() > 1){
+                    //Reduce frequency by 1, as we have used it in our solution
+                    currEntry.setValue(currEntry.getValue() - 1);
+                    //Add it to coolDown list
+                    coolDownList.add(currEntry);
+                }
+            }
+            // Add all coolDown characters back to maxHeap as they are eligible to add back to schedule
+            maxHeap.addAll(coolDownList);
+            // We could not add fill K+1 places from maxHeap, we will be having leftover 'n' idle intervals for next iterations
+            if(!maxHeap.isEmpty()) solution += n;
+        }
+        return solution;
+    }
     /*
     Maximum Frequency Stack - Design a stack-like data structure to push elements to the stack and pop the most frequent element from the stack.
     https://leetcode.com/problems/maximum-frequency-stack/
