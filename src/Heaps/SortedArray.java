@@ -61,4 +61,34 @@ public class SortedArray {
         Collections.sort(solution);
         return solution;
     }
+
+    /*
+      Merge k Sorted Lists - Given an array of k linked-lists lists, each linked-list is sorted in ascending order.
+      Merge all the linked-lists into one sorted linked-list and return it.
+      https://leetcode.com/problems/merge-k-sorted-lists/
+     */
+
+    /*
+    Kth Smallest Number in M Sorted Lists - Given ‘M’ sorted arrays, find the K’th smallest number among all the arrays.
+    https://www.geeksforgeeks.org/find-m-th-smallest-value-in-k-sorted-arrays/
+     */
+
+
+    /*
+    Kth Smallest Element in a Sorted Matrix - Given an n x n matrix where each of the rows and columns is sorted in ascending order,
+    return the kth smallest element in the matrix.
+    https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix/
+     */
+
+    /*
+    Smallest Range Covering Elements from K Lists - You have k lists of sorted integers in non-decreasing order.
+    Find the smallest range that includes at least one number from each of the k lists.
+    https://leetcode.com/problems/smallest-range-covering-elements-from-k-lists/
+     */
+
+    /*
+    Find K Pairs with Smallest Sums - Given two sorted arrays in ascending order ,
+    find ‘K’ pairs with the smallest sum where each pair consists of numbers from both the arrays.
+    https://leetcode.com/problems/find-k-pairs-with-smallest-sums/
+    */
 }
