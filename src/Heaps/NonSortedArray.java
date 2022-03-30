@@ -22,8 +22,18 @@ import java.util.*;
 
 public class NonSortedArray {
     public static void main(String[] args) {
-        int[] arr = new int[]{4,3,1,1,3,3,2};
-        System.out.println(findLeastNumOfUniqueInts(arr,3));
+
+        FreqStack freqStack = new FreqStack();
+        freqStack.push(5); // The stack is [5]
+        freqStack.push(7); // The stack is [5,7]
+        freqStack.push(5); // The stack is [5,7,5]
+        freqStack.push(7); // The stack is [5,7,5,7]
+        freqStack.push(4); // The stack is [5,7,5,7,4]
+        freqStack.push(5); // The stack is [5,7,5,7,4,5]
+        freqStack.pop();   // return 5, as 5 is the most frequent. The stack becomes [5,7,5,7,4].
+        freqStack.pop();   // return 7, as 5 and 7 is the most frequent, but 7 is closest to the top. The stack becomes [5,7,5,4].
+        freqStack.pop();   // return 5, as 5 is the most frequent. The stack becomes [5,7,4].
+        freqStack.pop();   // return 4, as 4, 5 and 7 is the most frequent, but 4 is closest to the top. The stack becomes [5,7].
     }
 
     /*
@@ -364,5 +374,43 @@ public class NonSortedArray {
     /*
     Maximum Frequency Stack - Design a stack-like data structure to push elements to the stack and pop the most frequent element from the stack.
     https://leetcode.com/problems/maximum-frequency-stack/
+    We need the element with max frequency, so we will use a maxHeap to store these values. maxHeap will be sorting based on frequency,
+    and we want the element pushed last to stack, so we will need another variable sequence to store insertion sequence.
+    We will need a map to track current character and its frequency in stack.
     */
+    static class FreqStack {
+
+
+        private Map<Integer,Integer> map;
+        private PriorityQueue<int[]> maxHeap;
+        private int sequence;
+
+        public FreqStack() {
+            sequence = 0;
+            map = new HashMap<>();
+            //maxHeap will first sort based on frequency, if they are equal, sort on sequence
+            maxHeap = new PriorityQueue<>(new Comparator<int[]>() {
+                @Override
+                // int[0] = val, int[1] = frequency, int[2] = sequence
+                public int compare(int[] o1, int[] o2) {
+                    if(o1[1] == o2[1]) return o2[2] - o1[2];
+                    return o2[1] - o1[1];
+                }
+            });
+        }
+
+        public void push(int val) {
+            //Frequency Map
+            map.put(val, map.getOrDefault(val, 0) + 1);
+            //Adding to Heap - Value, current frequency, sequence
+            maxHeap.add(new int[]{val,map.get(val),sequence++});
+        }
+
+        public int pop() {
+            int[] toReturnElement = maxHeap.poll();
+            //Decrease frequency of character
+            map.put(toReturnElement[0], map.get(toReturnElement[0]) - 1);
+            return toReturnElement[0];
+        }
+    }
 }
