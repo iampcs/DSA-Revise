@@ -4,6 +4,7 @@ import java.util.*;
 
 /*
 Given array here will be sorted, nearly sorted or K-Sorted. We will be using heap here to minimize time complexity.
+Most of these problems can be also solved with NonSortedArray methods, but we can optimize those solutions given that our input is sorted.
 
 */
 public class SortedArray {
@@ -88,6 +89,7 @@ public class SortedArray {
             this.next = next;
         }
     }
+
     public static ListNode mergeKLists(ListNode[] lists) {
         ListNode solutionHead =null, solutionTail = null;
         //minHeap to store ListNode - It's effective to store node data itself as it contains next node address
