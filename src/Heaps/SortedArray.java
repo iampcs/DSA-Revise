@@ -159,9 +159,6 @@ public class SortedArray {
         return solution;
     }
 
-
-
-
     /*
     Kth Smallest Element in a Sorted Matrix - Given an n x n matrix where each of the rows and columns is sorted in ascending order,
     return the kth smallest element in the matrix.
@@ -203,11 +200,92 @@ public class SortedArray {
     Smallest Range Covering Elements from K Lists - You have k lists of sorted integers in non-decreasing order.
     Find the smallest range that includes at least one number from each of the k lists.
     https://leetcode.com/problems/smallest-range-covering-elements-from-k-lists/
+    Approach will be similar to mergeKLists :
+    1. Insert first element of each list to a minHeap.
+    2. Keep track of current maximum number among all the numbers inside heap - currentMaxNumber
+    3. While our heap size is same as nums size - If our heap size is less than nums size, we are not considering a list for our solution,
+    so we end as soon as our minHeap size is less than nums size.
+        3.1. Poll minHeap
+        3.2. Check if this number and currentMaxNumber forms a new solution
+        3.3. Add new element from polled list
      */
+    public static int[] smallestRange(List<List<Integer>> nums) {
+        //int[0] = num, int[1] = elementIndex, int[2] = arrayIndex
+        PriorityQueue<int[]> minHeap = new PriorityQueue<>((a,b) -> a[0] - b[0]);
+        int rangeStart = 0, rangeEnd = Integer.MAX_VALUE, currentMaximumNumber = Integer.MIN_VALUE;
+
+        // Add first element of each list to minHeap - keep track of currentMaximumNumber
+        for(int i =0; i< nums.size(); i++){
+            if(nums.get(i) != null){
+                minHeap.add(new int[] {nums.get(i).get(0) , 0, i});
+                currentMaximumNumber = Math.max(currentMaximumNumber, nums.get(i).get(0));
+            }
+        }
+
+        while(minHeap.size() == nums.size()){
+            int[] currElement = minHeap.poll();
+            //We have found a smaller range
+            if(rangeEnd - rangeStart > currentMaximumNumber - currElement[0]){
+                rangeStart = currElement[0];
+                rangeEnd = currentMaximumNumber;
+            }
+
+            //Add next indexed number from same list as currElement - check if this new number is currentMaximumNumber
+            currElement[1] += 1;
+            if(nums.get(currElement[2]).size() > currElement[1]){
+                minHeap.add(new int[] {nums.get(currElement[2]).get(currElement[1]), currElement[1] , currElement[2]});
+                currentMaximumNumber = Math.max(currentMaximumNumber, nums.get(currElement[2]).get(currElement[1]));
+            }
+
+        }
+
+        return new int[]{rangeStart,rangeEnd};
+    }
 
     /*
     Find K Pairs with Smallest Sums - Given two sorted arrays in ascending order ,
     find ‘K’ pairs with the smallest sum where each pair consists of numbers from both the arrays.
     https://leetcode.com/problems/find-k-pairs-with-smallest-sums/
+    A straight forward solution will be - We can go through all the numbers of the two input arrays to create pairs and
+    initially insert them all in the maxHeap until we have ‘K’ pairs. After that, if a pair is smaller than the top (largest) pair in the maxHeap,
+    we can replace top with this new pair.
+    But, as arrays are sorted, we can optimize this solution further:
+    1. Instead of iterating over all the numbers of both arrays, we can iterate only the first ‘K’ numbers from both arrays.
+    Since the arrays are sorted in ascending order, the pairs with the minimum sum will be constituted by the first ‘K’
+    numbers from both the arrays.
+    2. As soon as we encounter a pair with a sum that is greater than the greatest (top) element of the heap,
+    we don’t need to process the next elements of the that array.
+    Since the arrays are sorted in ascending order, we won’t be able to find a pair with a lower sum moving forward.
     */
+    public List<List<Integer>> kSmallestPairs(int[] nums1, int[] nums2, int k) {
+        List<List<Integer>> solution = new ArrayList<>();
+        //maxHeap based on sum of numbers
+        //int[0] = number from nums1, int[1] = number from nums2
+        PriorityQueue<int[]> maxHeap = new PriorityQueue<>((a,b) -> (b[0] + b[1]) - (a[0] + a[1]));
+
+        //For all possible pairs + Optimization 1
+        for(int i =0; i<k && i<nums1.length;i++){
+            for(int j=0;j<k && j<nums2.length;j++){
+                //Keep adding till we have size K
+                if(maxHeap.size() < k){
+                    maxHeap.add(new int[]{nums1[i], nums2[j]});
+                }else{
+                    int[] topElement = maxHeap.peek();
+                    //Optimization 2
+                    if(topElement[0] + topElement[1] < nums1[i] + nums2[j]){
+                        break;
+                    }else{
+                        // We have found a new minimum sum, replace top with new one.
+                        maxHeap.poll();
+                        maxHeap.add(new int[]{nums1[i], nums2[j]});
+                    }
+                }
+            }
+        }
+        while (!maxHeap.isEmpty()){
+            int[] polledElement = maxHeap.poll();
+            solution.add(Arrays.asList(polledElement[0], polledElement[1]));
+        }
+        return solution;
+    }
 }
