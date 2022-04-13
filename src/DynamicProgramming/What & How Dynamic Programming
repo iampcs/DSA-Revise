@@ -1,0 +1,24 @@
+What ?
+1. Algorithmic technique for solving an optimization problem - Maximum, Minimum, Total/Count
+2. Can be broken down into simpler sub-problems - Choice/Decision -- Remember Backtracking?
+3. Overlapping sub-problems - Why even store a solution to a sub-problem if you can't reuse it?
+4. Optimal solution to the overall problem depends upon the optimal solution to its sub-problems
+
+Dynamic Programming is an extension of Backtracking where we solve for optimization - Ok, backtracking - you can find solutions, now tell me which is the best one
+or how many are there ?
+
+How?
+
+Journey of a Dynamic Problem - Brute Force Recursion -> Top-down with Memoization -> Bottom-up with Tabulation
+
+1. Top-down with Memoization : Exactly like backtracking - break problem based on decision - Do we have a solution now ? - break it further
+                               but we save/cache the solution so we don't solve the same solution again if we come via some other path.
+                               This technique of storing the results of already solved sub-problems is called Memoization.
+2. Bottom-up with Tabulation : No recursion here. We know that its not possible to solve bigger problems without solving smaller problems first,
+                               why not we just solve smaller problems first ? Solve smallest possible problems - build on these to solve bigger
+                               problems until we reach to the problem asked. Filling up a table with smaller problems and then calculating bigger problems based
+                               on results of smaller problems is tabulation.
+
+
+
+
