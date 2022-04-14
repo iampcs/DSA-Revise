@@ -1,6 +1,9 @@
 package DynamicProgramming;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 /*
 Problem Statement :  Given the weights and profits of ‘N’ items, -> Choice
@@ -133,7 +136,141 @@ public class ZeroOneKnapSack {
 
         //Solution will be in last cell - Why ? Because that is what is asked in question - Find for array size n and capacity W.
         return dpTable[n][W];
+    }
 
+    /*
+     Sometimes we also want to find the items in solution which makes up for max solution. This can be done if we backtrack from our final solution -  bottom-right corner.
+     At every step we had two options:
+     include an item - we include the item, then we jump to the remaining profit to find more items
+     or skip it - we take the profit from the remaining items (i.e. from the cell right above it);
+     */
+    private static List<Integer> printSelectedElements(int dpTable[][], int[] wt, int[] val, int W, int n){
+
+        int totalProfit = dpTable[n][W];
+        ArrayList<Integer> solutionList = new ArrayList<>();
+
+        for(int item = n; item > 0; item--) {
+            //If we have picked the nth item - n-1 index
+            //Just above cell represent a sub-problem where we don't have nth element with same capacity - same as skipping nth element
+            if(totalProfit != dpTable[item-1][W]) {
+                solutionList.add(wt[item-1]);
+
+                //Reduce capacity & total profit
+                W -= wt[item - 1];
+                totalProfit -= val[item - 1];
+            }
+        }
+
+        return solutionList;
+    }
+
+    /* Subset Sum - Given an array of non-negative integers, and a value sum, determine if there is a subset of the given set with sum equal to given sum.
+        This problem is very similar to 0/1 knapsack, we need to maximize value with knapsack weight as constraint - here value is weight, we need to fill tell
+        if it's possible to fill that knapsack fully.
+        https://practice.geeksforgeeks.org/problems/subset-sum-problem-1611555638/1/
+     */
+    static Boolean isSubsetSum(int N, int arr[], int sum){
+
+            Boolean[][] memo = new Boolean[N+1][sum + 1];
+            boolean[][] dpTable = new boolean[N+1][sum+1];
+
+            Boolean solution = false;
+
+            solution = isSubsetSumMemo(N,arr,sum,memo);
+            solution = isSubsetSumTabulation(N,arr,sum,dpTable);
+
+            return solution;
+
+    }
+
+    static Boolean isSubsetSumMemo(int N, int arr[], int sum , Boolean[][] memo){
+
+        if(sum == 0) return true;
+
+        //We don't have any elements left to put into bag
+        //We are traversing backward from item list
+        if(N == 0 ) return false;
+
+
+
+        //have we already solved this problem for current n & W? if yes return solution
+        if(memo[N][sum] != null) return memo[N][sum];
+
+        //Current value under consideration is less or equal to current sum - We have two choices now
+        if(arr[N-1] <= sum){
+            //We can either pick this item, if picked - Reduce sum. Recurse for remaining elements.
+            Boolean pickItem = isSubsetSumMemo(N-1, arr,sum - arr[N-1], memo);
+
+            //We can skip this item. Recurse for remaining elements
+            Boolean skipItem = isSubsetSumMemo(N-1, arr,sum,memo);
+
+            // Store in memo table & return logical or of both choices
+            memo[N][sum] = pickItem || skipItem;
+            return memo[N][sum];
+        }
+        // Our current item greater than sum - no option other than to skip it.
+        else {
+            //Skip item. Recurse for remaining elements
+            Boolean skipItem = isSubsetSumMemo(N-1, arr,sum , memo);
+            memo[N][sum] = skipItem;
+            return memo[N][sum];
+        }
+    }
+
+    static Boolean isSubsetSumTabulation(int N, int arr[], int sum , boolean[][] dpTable){
+
+        for(int num=0; num <= N; num++){
+            for(int currSum = 0; currSum <= sum; currSum++){
+                //Base conditions - If sum == 0, we can have an empty subset as a solution - so it's true
+                if(currSum == 0) {
+                    dpTable[num][currSum] = true;
+                    continue;
+                }
+                // If sum !=0, and we don't have any elements - we can't have a solution - so it's false
+                if(num == 0){
+                    dpTable[num][currSum] = false;
+                    continue;
+                }
+
+                //Current value under consideration is less or equal to current sum - We have two choices now
+                if(arr[num - 1] <= currSum){
+                    //We can either pick this item, if picked - Reduce sum. Check if it was possible to achieve this reduced sum without this number.
+                    Boolean pickItem = dpTable[num - 1][currSum - arr[num - 1]];
+
+                    //We can skip this item. Check if it was possible to achieve this same sum without this number.
+                    Boolean skipItem = dpTable[num - 1][currSum];
+
+                    // Store in memo table & return logical or of both choices
+                    dpTable[num][currSum] = pickItem || skipItem;
+                }
+                // Our current item greater than sum - no option other than to skip it.
+                else {
+                    //Skip item. Check if it was possible to achieve this same sum without this number.
+                    Boolean skipItem = dpTable[num - 1][currSum];
+                    dpTable[num][currSum] = skipItem;
+                }
+
+            }
+        }
+
+        return dpTable[N][sum];
+    }
+
+    /*
+    Partition Equal Subset Sum - Given a non-empty array nums containing only positive integers, find if the array can be partitioned into two subsets
+                                 such that the sum of elements in both subsets is equal.
+                                 https://leetcode.com/problems/partition-equal-subset-sum/
+      This is very similar to subset sum problem - in-fact we will be using that same problem to solve this.
+     */
+    public boolean canPartition(int[] nums) {
+        // Get total sum of all numbers
+        int totalSum = Arrays.stream(nums).sum();
+        //If total sum is odd, it's not possible to divide this into two sub-set
+        if(totalSum%2 != 0) return false;
+
+        // Now solve for subset problem with sum = totalSum/2 - If we can find a subset with sum = totalSum/2 means there will also exist another subset with same sum
+        boolean[][] dpTable = new boolean[nums.length + 1][totalSum/2 + 1];
+        return isSubsetSumTabulation(nums.length,nums, totalSum/2, dpTable);
     }
 
 
