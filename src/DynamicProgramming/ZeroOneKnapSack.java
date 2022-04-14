@@ -2,7 +2,6 @@ package DynamicProgramming;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /*
@@ -13,6 +12,7 @@ Problem Statement :  Given the weights and profits of ‘N’ items, -> Choice
 */
 public class ZeroOneKnapSack {
     public static void main(String[] args) {
+        System.out.println(findTargetSumWays(new int[]{0,0,0,0,0,0,0,0,1}, 1));
 
     }
 
@@ -193,7 +193,7 @@ public class ZeroOneKnapSack {
 
 
 
-        //have we already solved this problem for current n & W? if yes return solution
+        //have we already solved this problem for current n & sum? if yes return solution
         if(memo[N][sum] != null) return memo[N][sum];
 
         //Current value under consideration is less or equal to current sum - We have two choices now
@@ -271,6 +271,118 @@ public class ZeroOneKnapSack {
         // Now solve for subset problem with sum = totalSum/2 - If we can find a subset with sum = totalSum/2 means there will also exist another subset with same sum
         boolean[][] dpTable = new boolean[nums.length + 1][totalSum/2 + 1];
         return isSubsetSumTabulation(nums.length,nums, totalSum/2, dpTable);
+    }
+
+    /*
+        Count of Subsets Sum with a Given Sum - Given an array arr[] of integers and an integer sum,
+            the task is to count all subsets of the given array with a sum equal to a given sum.
+            https://practice.geeksforgeeks.org/problems/perfect-sum-problem5633/1#
+     */
+
+    public static int  perfectSumMemo(int arr[], int n, int sum)
+    {
+        Integer[][] memo = new Integer[n+1][sum+1];
+
+        return perfectSumMemo(arr,n,sum, memo);
+    }
+
+    public static int  perfectSumMemo(int arr[], int n, int sum, Integer[][] memo){
+
+        //Base Condition
+        //We have put n == 0 here because there are chances of having 0 as an element in our array
+        //So number of solution when sum = 0, and we don't have any element left , n= 0 is 1
+        if(sum == 0 && n == 0) return 1;
+
+        //We don't have any elements left to put into bag
+        //We are traversing backward from item list
+        if(n == 0) return 0;
+
+        //have we already solved this problem for current n & sum? if yes return solution
+        if(memo[n][sum] != null) return memo[n][sum];
+
+        if(arr[n-1] <= sum){
+            int pickElement = perfectSumMemo(arr, n-1, sum - arr[n-1], memo) ;
+            int skipElement = perfectSumMemo(arr, n-1, sum , memo) ;
+
+            // For a given n & sum - number of subsets with given sum will be addition of both its sub-problem
+            memo[n][sum] = pickElement + skipElement;
+            return memo[n][sum];
+        }
+        else {
+            int skipElement = perfectSumMemo(arr, n-1, sum , memo);
+            memo[n][sum] = skipElement;
+            return memo[n][sum];
+
+        }
+    }
+
+    /* Minimum sum partition - Given a positive integer array arr of size N, the task is to divide it into two sets S1 and S2 such that the absolute difference
+       between their sums is minimum and find the minimum difference
+       https://practice.geeksforgeeks.org/problems/minimum-sum-partition3317/1
+
+       Problem here is similar to above problem of equal sum partition - There we had two partitions S1 & S2, and S1 = S2 = totalSum/2.
+       Here we want | S1 - S2 | to be minimum. This can also be seen as |totalSum - 2S1 | to be minimum -> substituting S2 with totalSum - S1.
+       S1 + S2 = totalSum, Lets assume S1 will always be either smaller or equal to S2. Range of S1 -> [0, totalSum/2]. For this range we can find out which values are actually
+       possible with subset sum problem and put into our formula |totalSum - 2S1 | to get the minimum difference.
+       Instead of creating a new dpTable for range - [0,totalSum/2], we can optimize
+       if we solve for - isSubsetSumTabulation(int N, int arr[], int totalSum , boolean[][] dpTable) -
+            last row will be solution for all N items included with all sum -> 0 to totalSum -
+                We are only interested in range - [0,totalSum/2 ] - We have to create dpTable only once here
+
+      Note - This approach will only work for positive integers, if negative integers are also allowed - it breaks - that is a diff approach altogether
+      https://leetcode.com/problems/partition-array-into-two-arrays-to-minimize-sum-difference/
+
+     */
+    public int minDifference(int arr[], int n)
+    {
+        int totalSum = Arrays.stream(arr).sum();
+        boolean[][] dpTable = new boolean[n+1][totalSum + 1];
+        int minDifference = Integer.MAX_VALUE;
+
+        // dpTable created
+        isSubsetSumTabulation(n,arr,totalSum,dpTable);
+
+        //We are only interested in last row - where all elements are considered and in range [0, totalSum/2]
+        for(int currSum = totalSum/2; currSum >=0; currSum --){
+            if(dpTable[n][currSum] == true){
+                int currMin = totalSum - 2 * currSum;
+                minDifference = Math.min(minDifference, currMin);
+            }
+        }
+
+        return minDifference;
+    }
+
+    /* Target Sum - Count the number of subset with a given difference
+    https://leetcode.com/problems/target-sum/
+
+    Even though wordings are different for problems, it boils down to counting number of subset with a given difference. If we assign '+' to some items and '-' to some items
+    Lets segregate them, S1 -> all '+' one's, S2 -> all '-' ve one. It will be S1 - S2 = target (given sum difference)
+    Now let's do some maths -
+    S1 - S2 = target               - i
+    S1 + S2 = totalSum             - ii
+
+    Adding i & ii - 2S1 = target + totalSum
+    S1 = (target + totalSum)/ 2  -- Is this not similar to perfectSumMemo with sum = (target + totalSum)/ 2 ?
+
+     */
+
+    public static int findTargetSumWays(int[] nums, int target) {
+        int totalSum = Arrays.stream(nums).sum();
+
+        //target could be negative
+        int targetSum = Math.abs(target) + totalSum;
+
+        //If target sum is not divisible by 2, no solution exist
+        //If target sum is greater than totalSum - and each element is positive - we can never have a solution
+        if(targetSum % 2 != 0 || target > totalSum) return 0;
+
+        //S1 = (target + totalSum)/ 2
+        targetSum = targetSum /2;
+
+        Integer[][] memo = new Integer[nums.length + 1][targetSum + 1 ];
+
+        return perfectSumMemo(nums, nums.length, targetSum,memo) ;
     }
 
 
