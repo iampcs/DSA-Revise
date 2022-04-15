@@ -11,6 +11,12 @@ How?
 
 Journey of a Dynamic Problem - Brute Force Recursion -> Top-down with Memoization -> Bottom-up with Tabulation
 
+I find top-down approach to be more easy to code than bottom-up - it's just brute force recursion with caching solution.
+Both Memoization & Tabulation offers same complexity. Try to come up with a brute force recursion - memoize it, go to tabulation only if asked.
+
+In both these approaches we solve for N and then increment or decrement N. At any point in memo or dpTable matrix - when we are solving for
+X` and Y`, We are basically saying what if our input is only till X` instead of X and constraint is Y` instead of Y and solve for this new sub-problem.
+
 1. Top-down with Memoization : Exactly like backtracking - break problem based on decision - Do we have a solution now ? - break it further
                                but we save/cache the solution so we don't solve the same solution again if we come via some other path.
                                This technique of storing the results of already solved sub-problems is called Memoization.
@@ -18,6 +24,7 @@ Journey of a Dynamic Problem - Brute Force Recursion -> Top-down with Memoizatio
                                why not we just solve smaller problems first ? Solve smallest possible problems - build on these to solve bigger
                                problems until we reach to the problem asked. Filling up a table with smaller problems and then calculating bigger problems based
                                on results of smaller problems is tabulation.
+                               We solve this table from left to right & then go down. So at any point solution to our left and up will always available
 
 
 

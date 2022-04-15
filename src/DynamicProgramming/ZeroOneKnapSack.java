@@ -12,7 +12,6 @@ Problem Statement :  Given the weights and profits of ‘N’ items, -> Choice
 */
 public class ZeroOneKnapSack {
     public static void main(String[] args) {
-        System.out.println(findTargetSumWays(new int[]{0,0,0,0,0,0,0,0,1}, 1));
 
     }
 
@@ -105,6 +104,7 @@ public class ZeroOneKnapSack {
         }
     }
 
+    //Remember this - we solve this table from left to right & then go down. So at any point solution to our left and up will always available
     static int knapSackTabulation(int W, int wt[],int val[], int n, int[][] dpTable) {
         //We have our table already filled for base condition - for n=0 & W=0 - We need to populate for rest of cells - sub-problems
 
