@@ -300,7 +300,6 @@ public class LongestCommonSubsequence {
                     solution.append(str2.charAt(M-1));
                     M = M - 1;
                 }
-
             }
         }
 
@@ -314,10 +313,120 @@ public class LongestCommonSubsequence {
             N = N-1;
 
         }
-
         // As we are traversing and adding solution backwards - reverse it before returning
         return solution.reverse().toString();
     }
+
+    /*
+    Minimum number of deletions and insertions
+    Given two strings str1 and str2. The task is to remove or insert the minimum number of characters from/in str1 to transform it into str2.
+    https://practice.geeksforgeeks.org/problems/minimum-number-of-deletions-and-insertions0209/1#
+    OR
+    Delete Operation for Two Strings
+    https://leetcode.com/problems/delete-operation-for-two-strings/
+
+    Both the problems are same as they are asking for number of operations. This problem can be simplified to find LCS for both the strings only
+    and then doing operation on LCS. As we know LCS is the longest common subsequence - it will require the least amount of operation.
+    Eg. HEAP - str1, EAP - str2 , LCS - EA
+    For first problem  - str1 -> Remove HP -> EA -> Add E -> EAP
+    For second problem - str1 -> Remove HP -> EA <- Remove E <- EAP
+     */
+    public int minOperations(String str1, String str2){
+        Integer[][] dpTable = new Integer[str1.length() + 1][str2.length() + 1];
+        int lcs = longestCommonSubsequenceTabulation(str1, str1.length(), str2, str2.length(), dpTable);
+
+        return str1.length() +  str2.length() - 2 * lcs;
+    }
+
+    /* Longest Palindromic Subsequence - Given a string s, find the longest palindromic subsequence's length in s.
+       https://leetcode.com/problems/longest-palindromic-subsequence/
+
+       This can be solved using two approaches -
+       1. Using LCS code - If we try to find LCS for a string and its reverse - that LCS will be palindromic - Why ?
+          Because if something matches in front - it is guaranteed to match towards end too as the string is reversed.
+       2. Regular recursion approach - We will traverse the same string from left & right index - dpTable[left`][right`] - gives us the length
+          of the longest palindromic subsequence till left` & right` are traversed - so (0-left`) & (strLen - right`)
+          2.1. If characters match - check for (left + 1, right -1) + 2 - adding 2 as both these characters will be there in our solution
+          2.2 If left == right - add 1 - a single character is always palindromic - middle of string
+          2.3 If characters don't match - max of choices - ( skipping left, skipping right ) - max ((left+1, right), (left, right - 1))
+     */
+    public int longestPalindromeSubseq(String s){
+        Integer[][] dpTable = new Integer[s.length() + 1][s.length() + 1];
+        Integer[][] memo = new Integer[s.length() + 1][s.length() + 1];
+        StringBuilder sb = new StringBuilder(s);
+        String revS = sb.reverse().toString();
+        int lcsApproachSolution = longestCommonSubsequenceTabulation(s,s.length(), revS, revS.length(), dpTable);
+        int recursionApporoachSolution = longestPalindromeSubseqMemo(s,0,s.length() - 1, memo);
+
+        return recursionApporoachSolution;
+    }
+
+    private int longestPalindromeSubseqMemo(String s, int leftIndex, int rightIndex, Integer[][] memo) {
+        //Base Cond - We have crossed half mark path, no need to traverse further
+        if(leftIndex > rightIndex) return 0;
+        //Base Cond - Either single length string or we are at middle - single length is always palindrome - return 1
+        if(leftIndex == rightIndex) return 1;
+
+        //Have we already solved this ? Return if true
+        if(memo[leftIndex][rightIndex] != null) return memo[leftIndex][rightIndex];
+
+        //Characters matching - this will be part of my solution - Add 2, recurse for rest of string
+        if(s.charAt(leftIndex) == s.charAt(rightIndex)){
+            memo[leftIndex][rightIndex] = 2 + longestPalindromeSubseqMemo(s,leftIndex + 1, rightIndex - 1, memo);
+        }
+        //Last and First characters not matching - we have a choice now - either skip first and continue - or skip last and continue
+        //We will perform both and pick the one giving us the longest solution
+        else {
+            int skipLeftCharacter = longestPalindromeSubseqMemo(s, leftIndex + 1, rightIndex, memo);
+            int skipRightCharacter = longestPalindromeSubseqMemo(s, leftIndex, rightIndex - 1, memo);
+
+            memo[leftIndex][rightIndex] = Math.max(skipLeftCharacter, skipRightCharacter);
+        }
+        return memo[leftIndex][rightIndex];
+    }
+
+    /* Minimum Insertion Steps to Make a String Palindrome - Given a string s.
+       In one step you can insert or delete or insert/delete any character at any index of the string.
+       Return the minimum number of steps to make s palindrome.
+       https://leetcode.com/problems/minimum-insertion-steps-to-make-a-string-palindrome/
+       https://www.geeksforgeeks.org/minimum-number-deletions-make-string-palindrome/
+
+       Whether its deletion or insertion or both, approach is same - find the longest palindromic subsequence, one you have that -
+       you can either remove all the remaining characters to make string palindrome or add same characters again in correct order to make the
+       string palindrome.
+     */
+    public int minInsertions(String s) {
+        Integer[][] memo = new Integer[s.length() + 1][s.length() + 1];
+        int longestPalindromeSubseq = longestPalindromeSubseqMemo(s,0,s.length() - 1, memo);
+
+        return s.length() - longestPalindromeSubseq;
+    }
+
+    /* Longest Palindromic Substring - Given a string s, return the longest palindromic substring in s.
+       https://leetcode.com/problems/longest-palindromic-substring/
+
+       This kind of questions are tricky - specially if you have already solved subsequence problems. Approach will be completely
+       different here. We can solve this problem using two ways as both gives O(N^2 solution)
+       1. Using DP- tabulation method
+       2. Using iteration - expand method
+
+     */
+    public String longestPalindrome(String s) {
+
+    }
+
+    /* Longest Repeating Subsequence - Given a string str, find the length of the longest repeating subsequence such that it can be found twice in the given string.
+       The two identified subsequences A and B can use the same ith character from string str if and only if that ith character has different indices in A and B.
+       https://practice.geeksforgeeks.org/problems/longest-repeating-subsequence2004/1
+
+       Basically we want longest LCS which also has a duplicate present, and they should not share indices.
+
+     */
+    public int LongestRepeatingSubsequence(String str)
+    {
+
+    }
+
 
 
 }
