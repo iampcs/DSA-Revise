@@ -123,6 +123,53 @@ public class LongestCommonSubsequence {
         // We are appending in reverse order
         return solution.reverse().toString();
     }
+    /* Longest Repeating Subsequence - Given a string str, find the length of the longest repeating subsequence such that it can be found twice in the given string.
+       The two identified subsequences A and B can use the same ith character from string str if and only if that ith character has different indices in A and B.
+       https://practice.geeksforgeeks.org/problems/longest-repeating-subsequence2004/1
+
+       Basically we want longest LCS which also has a duplicate present, and they should not share indices. Knowing how to find LCS, how can
+       we modify the algorithm to accommodate this?  We are given only one string here,
+       so the second string will also be the fist string.
+       How about in step - S1.charAt(s1Index - 1) == S2.charAt(s2Index - 1), if characters match we add it to our solution. But we need two instances
+       of same solution here. How can we achieve that? What if we only match a character which are not in same indices? So if we have something like
+       0 1 2 3 4 5
+       A A B D C C  - i
+       A A B D C C  - ii
+       LCS - AABACC as all characters are matching
+       LRS - AC -   i(0) - ii(1),ii(3)  - Set 1 - A
+                    i(1) - ii(0),ii(3)  - Set 2 - A
+                    i(2) - Nothing
+                    i(3) - Nothing
+                    i(4) - ii(5)  - Set 1 - C
+                    i(5) - ii(4)  - Set 2 - C
+
+     */
+    public int LongestRepeatingSubsequence(String str)
+    {
+        int N = str.length();
+        int M = str.length();
+        int[][] dpTable = new int[N+1][M+1];
+
+        for(int s1Index = 0; s1Index <= N; s1Index++){
+            for(int s2Index = 0; s2Index <=M; s2Index++){
+                //Base Cond - If one of our string has zero length - we can't proceed to compare any further
+                if(s1Index == 0 || s2Index == 0) dpTable[s1Index][s2Index] = 0;
+
+                    //Character matches for both the String- This character could be part of our solution if they are not of same index
+                    // check for a solution where we don't have these characters
+                else if(str.charAt(s1Index - 1) == str.charAt(s2Index - 1) && s1Index != s2Index){
+                    dpTable[s1Index][s2Index] = 1 + dpTable[s1Index-1][s2Index-1];
+                }
+                //Skip either charter - check for an already solve sub-problem - store maximum of both
+                else {
+                    int skipFirtStringCharacter = dpTable[s1Index-1][s2Index];
+                    int skipSecondStringCharacter =  dpTable[s1Index][s2Index-1];
+                    dpTable[s1Index][s2Index] = Math.max(skipFirtStringCharacter,skipSecondStringCharacter);
+                }
+            }
+        }
+        return dpTable[N][M];
+    }
 
     /* Longest Common Substring - Given two strings. The task is to find the length of the longest common substring.
     https://practice.geeksforgeeks.org/problems/longest-common-substring1452/1/
@@ -408,24 +455,81 @@ public class LongestCommonSubsequence {
        This kind of questions are tricky - specially if you have already solved subsequence problems. Approach will be completely
        different here. We can solve this problem using two ways as both gives O(N^2 solution)
        1. Using DP- tabulation method
-       2. Using iteration - expand method
+       2. Using iteration - expand method - given a character expand left-right to check if it's a part of a palindrome 
 
      */
     public String longestPalindrome(String s) {
+        //dpTable[start][end] stores if the substring (start,end) is palindromic
+        // There is just one string, doesn't make sense here to keep the case of zero length string
+        //Using boolean as default value for boolean is false
+        boolean[][] dpTable = new boolean[s.length()][s.length()];
+        String solution = longestPalindromeTabulation(s,dpTable);
+        solution = longestPalindromeExpandMethod(s, s.length());
 
+        return solution;
     }
 
-    /* Longest Repeating Subsequence - Given a string str, find the length of the longest repeating subsequence such that it can be found twice in the given string.
-       The two identified subsequences A and B can use the same ith character from string str if and only if that ith character has different indices in A and B.
-       https://practice.geeksforgeeks.org/problems/longest-repeating-subsequence2004/1
-
-       Basically we want longest LCS which also has a duplicate present, and they should not share indices.
-
-     */
-    public int LongestRepeatingSubsequence(String str)
-    {
-
+    private String longestPalindromeExpandMethod(String s, int length) {
+        
+        if(length < 2) return s;
+        // palindromeVar[0] =palindromeStartIndex ,  palindromeVar[1] = palimdromeMaxLen
+        int[] palindromeVar = new int[]{0,0};
+        
+        for (int index = 0; index < length-1 ; index++ ){
+            expandPalindrome(s, index , index, palindromeVar);
+            expandPalindrome(s, index, index + 1, palindromeVar);
+        }
+        
+        return s.substring(palindromeVar[0], palindromeVar[0] + palindromeVar[1]);
     }
+
+    private void expandPalindrome(String s, int low, int high, int[] palindromeVar) {
+
+        //Expand in both direction until characters are matching
+        while (low >= 0 && high < s.length() && s.charAt(low) == s.charAt(high)){
+            low = low -1;
+            high = high + 1;
+        }
+
+        //Revert last while to get actual value of start-end of palindromic string
+        low = low + 1;
+        high = high - 1;
+
+        //If new length is greater than maxLen - update
+        if(high - low + 1> palindromeVar[1] )
+        {
+            palindromeVar[0] = low ;
+            palindromeVar[1] = high - low + 1;
+        }
+    }
+
+    private String longestPalindromeTabulation(String s, boolean[][] dpTable) {
+
+        int palindromeStartIndex = 0;
+        int palimdromeMaxLen = 0;
+
+        //start signifies start of our string in consideration - we are traversing from end - increasing length by one at a time
+        for(int start = s.length() - 1; start >= 0; start --){
+            //For a given start - we need to find the max palindrome within this window of (start-end)
+            for (int end = start; end < s.length(); end++){
+                //Character match - this string will be part of our solution
+                if(s.charAt(start) == s.charAt(end)){
+                    //will be set to true
+                    dpTable[start][end] = (end - start < 3) //This is a small optimization - if length is less than or equal to 3, only end characters should match
+                                            || dpTable[start + 1][end - 1]; // now that end characters are matching - check if this substring (start + 1, end - 1 ) was palindrome too
+                }
+                //Update start of palindrome substring and length if we found a longer palindrome - this can be modified to store palindromes too
+                if(dpTable[start][end] && (end - start + 1 > palimdromeMaxLen)){
+                    palindromeStartIndex = start;
+                    palimdromeMaxLen = end - start + 1;
+                }
+            }
+        }
+
+        return s.substring(palindromeStartIndex,palindromeStartIndex + palimdromeMaxLen);
+    }
+
+
 
 
 
