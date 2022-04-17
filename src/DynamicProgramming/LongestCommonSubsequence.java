@@ -168,11 +168,156 @@ public class LongestCommonSubsequence {
         return maxLength;
     }
 
+    /* Shortest Common Supersequence (SCS) - Given two strings str1 and str2, return the shortest string that has both str1 and str2 as subsequences.
+       If there are multiple valid strings, return any of them.
+       https://leetcode.com/problems/shortest-common-supersequence/
+       This problem can be solved using two approaches
+       1. Using the longest common subsequence -
+            1.1. We will get the length of our solution as - M + N - lcs(str1,str2) - This logic is simple to understand - lcs is common among two string
+                 use that common part only once. We will get the dpTable[N][M], buy running lcs()
+            2.2. Will use this dpTable and fill up our solution in bottom-up manner -
+                 * Base - If either is zero - return the other one
+                 * If the current characters of N and M are equal, they are part of the SCS, and we move diagonally in the dptable - N-1, M-1
+                 * If the current characters of X and Y are different, go up or left, depending on which cell has a higher number - this is same as
+                   printSubsequence(), just that we are adding those characters too
+                 * We can also find all SCS by tweaking above function a little
+       2. We solve this like regular SCS problem - will create a dpTable[N][M], this dpTable will store length of SCS for current N`,M`
+          * Once we have this table ready - we will backtrack to print solution
+
+     This problem requires us to print solution - We can either build a recursive solution to create a memo and then another function to
+     print this solution, or we can create a tabulation function to create dpTable and use that table to find solution too in same function -
+     will be using the tabulation method
+     */
+    public String shortestCommonSupersequence(String str1, String str2) {
+
+        String solution = shortestCommonSupersequenceLCS(str1, str1.length(), str2, str2.length() );
+        solution = shortestCommonSupersequenceTabulation(str1, str1.length(), str2, str2.length());
+
+        return solution;
+    }
+
+    private String shortestCommonSupersequenceTabulation(String str1, int N, String str2, int M) {
+        Integer[][] dpTable = new Integer[N+1][M+1];
+        StringBuilder solution = new StringBuilder();
+
+        for (int row = 0; row <= N; row++) {
+            for (int col = 0; col <= M; col++) {
+                //Base conditions - If one string is empty - the shortest length of solution will be current length of other string
+                if(row == 0)
+                    dpTable[row][col] = col;
+                else if (col == 0 )
+                    dpTable[row][col] = row;
+                //If characters match we only need to include that character once in our solution
+                //If we already have solution length of N`,M` and we add same character to both the string - we only need to add it once in our
+                //solution string - so length increased by 1
+                //Eg.   A B C D  - S1 , A C D    - S2
+                // SCS - ABCD of length 4 , if we add 'E' to both the string - SCS will become ABCDE hence increasing length by 1
+                else if (str1.charAt(row - 1) == str2.charAt(col - 1)) {
+                    dpTable[row][col] = 1 + dpTable[row - 1][col - 1];
+                }
+                // Now characters are not matching - We have a choice - I can add both these characters to my solution and move on.
+                //But there could be a chance if adding one will do. In that case we check addling which one will give us the minimum length
+                //Eg. ABCD - S1 , ABD - S2
+                // SCS - Till AB it will add to solution as characters are same. But at index 2, we have C & D. We can either add both C & D
+                // to pur solution and move to index 3 - but this will increase the SCS length - So we are not even considering this option
+                //We have two options
+                //We can add only C to SCS and check if D is taken care of in future - As we add a character we add 1
+                //We can add only D to SCS and check if C is taken care of in future - As we add a character we add 1
+                //We took the option which gives the minimum SCS length
+                else {
+                    dpTable[row][col] = Math.min(dpTable[row - 1][col] + 1, dpTable[row][col - 1] + 1);
+                }
+            }
+        }
+
+        //While we both strings
+        while(N > 0 && M > 0){
+            //If characters are equal at index N,M - We used to add it to solution and check for N-1 and M-1
+            //We will be doing the same here too
+            if(str1.charAt(N-1) == str2.charAt(M-1)){
+                solution.append(str1.charAt(N-1));
+                N = N-1;
+                M = M- 1;
+            }
+            //When characters are not equal - we get dpTable[N][M] from min of dpTable[N-1][M] + 1, dpTable[N][M-1] + 1
+            //We will be backtracking here based on same condition
+            //Add current string to solution
+            else {
+                if(dpTable[N-1][M] < dpTable[N][M-1]){
+                    solution.append(str1.charAt(N-1));
+                    N = N - 1;
+                }
+                else{
+                    solution.append(str2.charAt(M-1));
+                    M = M - 1;
+                }
+
+            }
+        }
+
+        // One of string is empty - add other one as it is
+        while (N > 0) {
+            solution.append(str1.charAt(N-1));
+            N = N-1;
+
+        }
+
+        while (M > 0) {
+            solution.append(str2.charAt(M-1));
+            M = M - 1;
+        }
+
+        // As we are traversing and adding solution backwards - reverse it before returning
+        return solution.reverse().toString();
 
 
+    }
 
+    private String shortestCommonSupersequenceLCS(String str1, int N, String str2, int M) {
+        Integer[][] dpTable = new Integer[N+1][M+1];
+        //Will get us the dpTable
+        longestCommonSubsequenceTabulation(str1,N,str2,M,dpTable);
+        StringBuilder solution = new StringBuilder();
 
+        //While we both strings
+        while(N > 0 && M > 0){
+            //If characters are equal at index N,M - We used to add it to solution and check for N-1 and M-1
+            //We will be doing the same here too
+            if(str1.charAt(N-1) == str2.charAt(M-1)){
+                solution.append(str1.charAt(N-1));
+                N = N-1;
+                M = M- 1;
+            }
+            //When characters are not equal - we get dpTable[N][M] from max of dpTable[N-1][M], dpTable[N][M-1]
+            //We will be backtracking here based on same condition
+            //Add current string to solution
+            else {
+                if(dpTable[N-1][M] > dpTable[N][M-1]){
+                    solution.append(str1.charAt(N-1));
+                    N = N - 1;
+                }
+                else{
+                    solution.append(str2.charAt(M-1));
+                    M = M - 1;
+                }
 
+            }
+        }
+
+        // One of string is empty - add other one as it is
+        while (M > 0) {
+            solution.append(str2.charAt(M-1));
+            M = M - 1;
+        }
+        while (N > 0) {
+            solution.append(str1.charAt(N-1));
+            N = N-1;
+
+        }
+
+        // As we are traversing and adding solution backwards - reverse it before returning
+        return solution.reverse().toString();
+    }
 
 
 }
