@@ -1,4 +1,8 @@
 package DynamicProgramming;
+
+import java.util.Arrays;
+import java.util.Collections;
+
 /*
  These are mostly string based problems - where we will be asked to compare two strings or compare with itself and find solution based
  on some conditions. Just like any DP problems, we will have a choice here on current character and based on those choices we will take decisions
@@ -529,6 +533,33 @@ public class LongestCommonSubsequence {
         return s.substring(palindromeStartIndex,palindromeStartIndex + palimdromeMaxLen);
     }
 
+    /* Longest Increasing Subsequence - Given an integer array nums, return the length of the longest strictly increasing subsequence.
+       https://leetcode.com/problems/longest-increasing-subsequence/
+       dpTable[n`] - means the longest increasing subsequence ending at n
+       Each number individually is a LIS in itself - so we fill the dpTable with 1
+
+     */
+    public int lengthOfLIS(int[] nums) {
+        int dpTable[] = new int[nums.length];
+        Arrays.fill(dpTable,1);
+        int lis = 1;
+
+        //First for loop is to include one number at time and calculate its LIS
+        for(int i = 0; i < dpTable.length; i++){
+            //For each number included from above loop - we will check if it can be a part of any existing LIS - if yes we will store the maximum
+            for(int j=0; j<i; j++){
+                //If my current number is greater than any previous number, I can be a part of this numbers LIS
+                //Take max of exiting LIS , will be 1 initially, LIS of which [i] can be part of + 1(i itself)
+                if(nums[i] > nums[j]){
+                    dpTable[i] = Math.max(dpTable[i], dpTable[j]+1);
+                    //If I found a longer LIS for current number  - store it
+                    if(lis < dpTable[i])
+                        lis = dpTable[i];
+                }
+            }
+        }
+        return lis;
+    }
 
 
 
