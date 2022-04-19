@@ -2,6 +2,7 @@ package DynamicProgramming;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 
 /*
  These are mostly string based problems - where we will be asked to compare two strings or compare with itself and find solution based
@@ -14,6 +15,8 @@ import java.util.Collections;
  */
 public class LongestCommonSubsequence {
     public static void main(String[] args) {
+        int[] nums = new int[]{2,5,3,7,8,1,9};
+        findLBSLength(nums);
 
     }
 
@@ -532,6 +535,53 @@ public class LongestCommonSubsequence {
 
         return s.substring(palindromeStartIndex,palindromeStartIndex + palimdromeMaxLen);
     }
+    /* Subsequence Pattern Matching - Given a string and a pattern, write a method to count the number of times the pattern appears in the string as a subsequence.
+       https://techiedelight.com/practice/?problem=PatternMatchIV
+       This problem is very much similar to LCS - but here we want one word - pattern, to be completely a subsequence of another word.
+       Brute force approach will be - match the pattern with the given string one character at a time
+        1. If character matches - recursively match for the remaining lengths of the pattern and the word.
+        2. At every step, we can always skip a character from the word to try to match the remaining string with the pattern. Start a recursive call by skipping one character from the word.
+        3. Total counts will be sum of both of above calls - Why does this works?  Because we are making a call where we are skipping only word and not pattern - So there will
+            always be a case where we are searching for a whole pattern on each starting/ending character of word.
+
+        For Memo approach - memo[N`][M`] - stores total count of pattern till M` in word till N`
+     */
+    public static int numberOfPatternInString(String word, String pattern)
+    {
+       int solution = 0;
+       Integer[][] memo = new Integer[word.length() + 1][pattern.length() + 1];
+       solution = numberOfPatternInStringMemo(word, word.length(), pattern, pattern.length(), memo );
+
+       return solution;
+    }
+
+    private static int numberOfPatternInStringMemo(String word, int N, String pattern, int M, Integer[][] memo) {
+        // This ordering is important - What we have a situation where last character is remaining for word and patter and it's a match ?
+        // Recursion call for N-1 will be called and returned zero - hence check for pattern length to be zero first
+        if(M == 0) return 1;
+        if(N == 0 ) return  0;
+
+        //Have we already solved this problem ?
+        if(memo[N][M] != null) return memo[N][M];
+
+        //Character match - We have a choice - recurse for remaining length of word and pattern or skip this character from word
+        //Total number of possible solutions with be sum of both
+        if(word.charAt(N-1) == pattern.charAt(M-1)){
+            int chooseChar  = numberOfPatternInStringMemo(word, N-1, pattern, M-1, memo);
+            int skipChar = numberOfPatternInStringMemo(word, N-1, pattern, M , memo);
+
+            memo[N][M] = chooseChar + skipChar;
+        }
+        // We don't have a choice - skip word character and recurse for remaining word
+        //I can always take the common part of skipping from both matching & non-matching to make the code small - But this is more intuitive - shows me that I had a choice
+        //I choose based on those choice and that is what overlaps the problem sub-set - Fits the template of recursion
+        else{
+            int skipChar = numberOfPatternInStringMemo(word, N-1, pattern, M , memo);
+            memo[N][M] = skipChar;
+        }
+
+        return memo[N][M];
+    }
 
     /* Longest Increasing Subsequence - Given an integer array nums, return the length of the longest strictly increasing subsequence.
        https://leetcode.com/problems/longest-increasing-subsequence/
@@ -539,8 +589,9 @@ public class LongestCommonSubsequence {
        Each number individually is a LIS in itself - so we fill the dpTable with 1
 
      */
-    public int lengthOfLIS(int[] nums) {
-        int dpTable[] = new int[nums.length];
+    public static int lengthOfLIS(int[] nums, int[] dpTable) {
+        // dpTable.length will be nums.length
+        //Each number individually is a LIS in itself - so we fill the dpTable with 1
         Arrays.fill(dpTable,1);
         int lis = 1;
 
@@ -561,7 +612,84 @@ public class LongestCommonSubsequence {
         return lis;
     }
 
+    /* Maximum sum increasing subsequence - Given an array of n positive integers. Find the sum of the maximum sum subsequence of the given array such that the
+       integers in the subsequence are sorted in increasing order i.e. increasing subsequence.
+        https://practice.geeksforgeeks.org/problems/maximum-sum-increasing-subsequence4749/1#
+        Same logic as above - LIS. Instead of length we are maximizing sum now, so instead of length of each number  i.e 1, we will be using the number itself
+     */
+    public int maxSumIS(int arr[], int n)
+    {
+        int dpTable[] = new int[n];
+        for(int i = 0; i< n ; i++) dpTable[i] = arr[i];
+        int liss = arr[0];
+
+        //First for loop is to include one number at time and calculate its LISS
+        for(int includedNumbers = 0; includedNumbers < n; includedNumbers++){
+            //For each number included from above loop - we will check if it can be a part of any existing LISS - if yes we will store the maximum
+            for(int previousCalculatedLISS=0; previousCalculatedLISS<includedNumbers; previousCalculatedLISS++){
+                //If my current number is greater than any previous number, I can be a part of this numbers LISS
+                //Take max of exiting LISS , will be arr[i] initially, LISS of which [i] can be part of + arr[i](i itself)
+                if(arr[includedNumbers] > arr[previousCalculatedLISS]){
+                    dpTable[includedNumbers] = Math.max(dpTable[includedNumbers], dpTable[previousCalculatedLISS]+arr[includedNumbers]);
+                    //If I found a greater LISS for current number  - store it
+                    if(liss < dpTable[includedNumbers])
+                        liss = dpTable[includedNumbers];
+                }
+            }
+        }
+        return liss;
+    }
+
+    /* Minimum number of deletions to make a sorted sequence - Given an array arr of size N, the task is to remove or delete the minimum number of elements from the
+       array so that when the remaining elements are placed in the same sequence order form an increasing sorted sequence.
+       https://practice.geeksforgeeks.org/problems/minimum-number-of-deletions-to-make-a-sorted-sequence3248/1/#
+       This problem looks like a diff problem, but is an extension of LIS only. For a given array - LIS gives you the list of the longest increasing subsequence, if we remove
+       all others elements which are not part of this LIS, we will have a sorted array.
+     */
+    public int minDeletions(int nums[], int n)
+    {
+        int[] dpTable = new int[n];
+        int LIS = lengthOfLIS(nums, dpTable);
+        //Delete length of elements not part of LIS
+        return n - LIS;
+
+    }
+    /* Longest Bitonic Subsequence - A subsequence is considered bitonic if it is monotonically increasing and then monotonically decreasing.
+       https://techiedelight.com/practice/?problem=LongestBitonicSubsequence
+       How can we use LIS here? What we want is for each index i - We want the longest decreasing sequence towards its left, the longest decreasing sequence towards its right
+       and add itself to both - 1 + LDS-left + LDS-right
+       Now, if we calculate LIS from left to right , at any index i , i to 0 will be LDS-left
+       Now if we calculate LIS from right to left , at any index i, i to array.length will be LDS-right
+       Eg. If we take the index 4(8), 4 + 2 -1 = 5 will be the longest Bitonic subsequence
+              2 5 3 7 8 1 9
+        LIS-  1 2 2 3 4 1 5
+        RLIS- 2 3 2 2 2 1 1
+     */
+    public static int findLBSLength(int[] nums)
+    {
+        int solution = 0;
+        int[] reverseNums = new int[nums.length];
+        for(int i = 0; i< reverseNums.length; i++){
+            reverseNums [i] = nums[nums.length - i - 1];
+        }
+
+        int[] LIS_leftToRight = new int[nums.length];
+        lengthOfLIS(nums, LIS_leftToRight);
+
+        //We don't have a function to calculate LIS from right to left  - so we are reversing the array and calculating
+        int[] LIS_rightToLeft = new int[nums.length];
+        lengthOfLIS(reverseNums, LIS_rightToLeft);
+
+        for (int i = 0; i < nums.length; i++){
+            //We could either reverse the LIS_rightToLeft array or read from opposite index
+            if(LIS_leftToRight[i] + LIS_rightToLeft[nums.length - 1 - i] - 1 > solution)
+                solution = LIS_leftToRight[i] + LIS_rightToLeft[nums.length - 1 - i] - 1;
+        }
+        return solution;
+
+    }
 
 
 
-}
+
+    }
