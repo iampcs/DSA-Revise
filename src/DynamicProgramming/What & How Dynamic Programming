@@ -20,11 +20,15 @@ X` and Y`, We are basically saying what if our input is only till X` instead of 
 1. Top-down with Memoization : Exactly like backtracking - break problem based on decision - Do we have a solution now ? - break it further
                                but we save/cache the solution so we don't solve the same solution again if we come via some other path.
                                This technique of storing the results of already solved sub-problems is called Memoization.
+                               How do we create this table? Easiest way is to think of a recursive solution - done ? What ever are the changing
+                               parameters in recursive function - make a table on that - if two parameters are changing - 2D array, if 3 parameters - 3D.
+                               There are ways to reduce this space complexity with some smartness - where you are derive a dimension based of others or
+                               problem itself.
 2. Bottom-up with Tabulation : No recursion here. We know that its not possible to solve bigger problems without solving smaller problems first,
                                why not we just solve smaller problems first ? Solve smallest possible problems - build on these to solve bigger
                                problems until we reach to the problem asked. Filling up a table with smaller problems and then calculating bigger problems based
                                on results of smaller problems is tabulation.
-                               We solve this table from left to right & then go down. So at any point solution to our left and up will always available
+                               We solve this table from left to right & then go down. So at any point solution to our left and up will always available.
 
 
 

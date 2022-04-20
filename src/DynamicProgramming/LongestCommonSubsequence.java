@@ -12,6 +12,15 @@ import java.util.HashMap;
  Problem Statement - Given two strings ‘s1’ and ‘s2’, find the length of the longest subsequence which is common in both the strings.
 
  Subsequence is non-contiguous, Substring is contiguous.
+ A common theme around this kind of questions is to think recursively for a brute solution - recursion will be like
+    1. What if an item satisfies my condition - What can I do ?
+        1.1. Add this as my solution and recurse for rest of elements
+        2.2  Skip this item and recurse for rest of elements
+    2. Skip this item irrespective and recurse for rest
+
+These choices which are not mutually exclusive cause overlapping sub-problems, hence DP
+If what is asked is maximum/minimum/longest/shortest - Its usually one of these recursive calls
+If what is asked is total/All - Its sum of all recursive calls
  */
 public class LongestCommonSubsequence {
     public static void main(String[] args) {
@@ -689,7 +698,164 @@ public class LongestCommonSubsequence {
 
     }
 
+    /* Longest Alternating Subsequence - Given a number sequence, find the length of its Longest Alternating Subsequence (LAS). A subsequence is considered alternating if its elements are in alternating order.
+       {a1 > a2 < a3 } or { a1 < a2 > a3}
+       https://techiedelight.com/practice/?problem=LongestAlternatingSubsequence
+     */
+    public static int findLongestAlternatingSequence(int[] nums)
+    {
+        //Maximum of both possibilities - {a1 > a2 < a3 } or { a1 < a2 > a3}
+        //We are traversing from starting index here
+        int solution = Math.max(findLASBrute(nums, -1, 0, true),findLASBrute(nums, -1, 0, false)) ;
+        solution = Math.max(findLASMemo(nums, -1, 0, true, new Integer[nums.length][2]),findLASMemo(nums, -1, 0, false, new Integer[nums.length][2])) ;
 
-
-
+        return solution;
     }
+
+    //Finding the LAS starting from every number in both ascending and descending order. So for every index ‘i’ in the given array, we will have three options:
+    //1. If item i is bigger than previous item - include i and recurse for remaining items
+    //2. If item i is smaller than previous item - include i and recurse for remaining items
+    //3. Skip i and recurse for remaining items
+    private static int findLASBrute(int[] nums, int prevIndex, int currIndex, boolean shouldBeBigger) {
+        //We are our of items - return 0
+        if(currIndex == nums.length) return 0;
+
+        int keepItem = 0;
+        //If we are looking for a bigger item
+        if(shouldBeBigger){
+            // And we found a bigger item - keep that item - recurse for next index - look for a smaller item now
+            if(prevIndex == -1 || nums[prevIndex] < nums[currIndex]){
+                keepItem = 1 +  findLASBrute(nums, currIndex, currIndex + 1, false);
+            }
+        }
+        //If we are looking for a smaller item
+        else {
+            // And we found a smaller item - keep that item - recurse for next index - look for a bigger item now
+            if(prevIndex == -1 || nums[prevIndex] > nums[currIndex]){
+                keepItem = 1 +  findLASBrute(nums, currIndex, currIndex + 1, true);
+            }
+        }
+
+        //Excise your option of skipping this item irrespective of whatever you were looking for
+        int skipItem = findLASBrute(nums, currIndex, currIndex + 1, shouldBeBigger);
+
+        //Maximum of all our choices will be the solution
+        return Math.max(keepItem, skipItem);
+    }
+
+    private static int findLASMemo(int[] nums, int prevIndex, int currIndex, boolean shouldBeBigger, Integer[][]memo) {
+        //We are our of items - return 0
+        if(currIndex == nums.length) return 0;
+
+        if(memo[currIndex][shouldBeBigger ? 1:0] != null) return memo[currIndex][shouldBeBigger ? 1:0];
+
+        int keepItem = 0;
+        //If we are looking for a bigger item
+        if(shouldBeBigger){
+            // And we found a bigger item - keep that item - recurse for next index - look for a smaller item now
+            if(prevIndex == -1 || nums[prevIndex] < nums[currIndex]){
+                keepItem = 1 +  findLASMemo(nums, currIndex, currIndex + 1, false, memo);
+            }
+        }
+        //If we are looking for a smaller item
+        else {
+            // And we found a smaller item - keep that item - recurse for next index - look for a bigger item now
+            if(prevIndex == -1 || nums[prevIndex] > nums[currIndex]){
+                keepItem = 1 +  findLASMemo(nums, currIndex, currIndex + 1, true, memo);
+            }
+        }
+
+        //Excise your option of skipping this item irrespective of whatever you were looking for
+        int skipItem = findLASMemo(nums, currIndex, currIndex + 1, shouldBeBigger, memo);
+        // Store solution to this sub-problem
+        memo[currIndex][shouldBeBigger ? 1: 0] = Math.max(keepItem, skipItem);
+
+        //Maximum of all our choices will be the solution
+        return memo[currIndex][shouldBeBigger ? 1: 0];
+    }
+
+    /* Edit Distance - Given two strings word1 and word2, return the minimum number of operations required to convert word1 to word2.
+        You have the following three operations permitted on a word:
+            Insert a character
+            Delete a character
+            Replace a character
+      https://leetcode.com/problems/edit-distance/
+
+      Same logic - We will recur on choices
+      1. If characters are matching - No need to perform any operations - recur for next index of both the strings
+      2. Characters are not matching ? - We have three choices here - We want the minimum operations here so minimum of all these choices
+           2.1. Can insert a character to word1 - recurse for (word1Index , word2Index + 1) - We are not actually inserting a character to word1, just
+                counting an insertion, after insertion word2Index is same so we recurse for next index, we are not actually inserting a character so we will
+                again recurse from word1Index
+           2.2. Can delete a character from word1 - recurse for (word1Index + 1 , word2Index) - Again same logic - not actually deleting a character
+                just making it look like we are doing these operations with index modifications
+           2.3. Can replace a character in word1 - recurse for (word1Index + 1 , word2Index + 1) - same as character matching -
+                Why don't we just replace all characters? Because for that string length should be same - which can be achieved by either insertion or deletion
+
+     */
+    public int minDistance(String word1, String word2) {
+
+        int solution = 0;
+        Integer[][] memo = new Integer[word1.length() + 1][word2.length() + 1];
+        Integer[][]dpTable = new Integer[word1.length() + 1][word2.length() + 1];
+
+        solution = minDistanceMemo(word1, word2, 0, 0, memo);
+        solution = minDistanceTabulation(word1, word2, word1.length(), word2.length(), dpTable);
+
+
+        return solution;
+    }
+
+    private int minDistanceMemo(String word1, String word2, int len1, int len2, Integer[][] memo) {
+
+        //If word1 is shorter than word2 - we have to insert that shortage length to word1
+        if(len1 == word1.length()) return word2.length() - len2;
+        //If word1 is longer than word2 - we need to delete that extra length from word1
+        if(len2 == word2.length()) return word1.length() -  len1;
+
+        //Have we solved this problem?
+        if(memo[len1][len2] != null) return memo[len1][len2];
+
+        //Characters are matching - recurse for (word1Index , word2Index + 1)
+        if(word1.charAt(len1) == word2.charAt(len2)) {
+            memo[len1][len2] = minDistanceMemo(word1, word2, len1 + 1, len2 + 1, memo);
+        }
+        //Characters are not matching - recurse for all three choices - pick the minimum
+        else {
+            int insertCharacter = 1 + minDistanceMemo(word1, word2, len1, len2 + 1, memo);
+            int deleteCharacter = 1 + minDistanceMemo(word1, word2,len1 + 1, len2, memo);
+            int replaceCharacter = 1 + minDistanceMemo(word1, word2, len1 + 1, len2 + 1, memo);
+
+            memo[len1][len2] = Math.min(insertCharacter, Math.min(deleteCharacter,replaceCharacter));
+        }
+        return memo[len1][len2];
+    }
+
+    private int minDistanceTabulation(String word1, String word2, int length1, int length2, Integer[][] dpTable) {
+
+        for(int i = 0; i <= length1; i++){
+            for (int j = 0; j <= length2; j++){
+                //Base condition
+                if(i ==0 && j ==0 ) dpTable[i][j] = 0;
+                    //If word1 is shorter than word2 - we have to insert that shortage length to word1
+                else if(i ==0) dpTable[i][j] = j;
+                    //If word1 is longer than word2 - we need to delete that extra length from word1
+                else if(j == 0) dpTable[i][j] = i;
+                    //Characters are matching - no operation required- solution will be same as if these characters were not even there
+                else if(word1.charAt(i - 1) == word2.charAt(j -1)) dpTable[i][j] = dpTable[i-1][j-1];
+                    //Characters are not matching - pick the minimum
+                else {
+                    int insertCharacter = 1 + dpTable[i][j -1];
+                    int deleteCharacter = 1 + dpTable[i -1][j];
+                    int replaceCharacter = 1 + dpTable[i-1][j-1];
+
+                    dpTable[i][j] = Math.min(insertCharacter, Math.min(deleteCharacter,replaceCharacter));
+                }
+            }
+        }
+
+        return dpTable[length1][length2];
+    }
+
+
+}
