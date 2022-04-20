@@ -857,5 +857,104 @@ public class LongestCommonSubsequence {
         return dpTable[length1][length2];
     }
 
+    /* Strings Interleaving - Given strings s1, s2, and s3, find whether s3 is formed by an interleaving of s1 and s2.
+       ‘s3’ would be considered interleaving ‘s1’ and ‘s2’ if it contains all the letters from ‘s1’ and ‘s2’ and the order of letters is preserved too.
+        https://leetcode.com/problems/interleaving-string/
+
+        A recursion solution will - to start with all three strings - s1Index, s2Index, s3Index
+        1. If characters at s1Index & s3Index matches - recurse for next indexes
+        2. If characters at s2Index & s3Index matches - recurse for next indexes
+        3. If we reach a point where all three indexes are at their end - we have a solution else we don't
+
+        Now same character can be matching with both s1 & s2 - we don't to which string it belongs to - so we will recurse for both the options - this creates overlapping problems
+        Why are not skipping characters here ? Because we don't have that choice - each character in s3 must be matching to either s1 or s2.
+        length of s3 = length of s1 + length of s2 - so we can't skip a single character
+     */
+    public boolean isInterleave(String s1, String s2, String s3) {
+        boolean solution = false;
+
+        //We don't need to take s3 parameter into consideration here because we are checking for condition
+        //length3 != length1 + length2 at start of each call
+        //So our memo[n`][m`] is storing result for - if we have s1 till n`, s2 till m` and s3 till n`+m`.Is s3 made up from s1 and s2 interleaving
+        Boolean[][] memo = new Boolean[s1.length() + 1][s2.length() + 1];
+        Boolean[][] dpTable = new Boolean[s1.length() + 1][s2.length() + 1];
+        solution = isInterleaveBrute(s1,s2,s3, s1.length(), s2.length(),s3.length());
+        solution = isInterleaveMemo(s1,s2,s3, s1.length(), s2.length(),s3.length(),memo);
+        solution = isInterleaveTabulation(s1,s2,s3, s1.length(), s2.length(),s3.length(),dpTable);
+
+        return solution;
+    }
+
+
+    private boolean isInterleaveBrute(String s1, String s2, String s3, int length1, int length2, int length3) {
+        //Base condition
+        if(length3 != length1 + length2) return false;
+        if(length1 == 0 && length2 == 0 && length3 == 0) return true;
+
+        boolean isFirstChoiceCorrect = false;
+        boolean isSecondChoiceCorrect = false;
+
+        //If characters at s1Index & s3Index matches - recurse for next indexes
+        if(length1 != 0 && s1.charAt(length1 - 1) == s3.charAt(length3 - 1)){
+           isFirstChoiceCorrect = isInterleaveBrute(s1,s2,s3,length1 -1, length2, length3 -1);
+        }
+
+        //If characters at s2Index & s3Index matches - recurse for next indexes
+        if(length2 != 0 && s2.charAt(length2 - 1) == s3.charAt(length3 - 1)){
+            isSecondChoiceCorrect = isInterleaveBrute(s1,s2,s3,length1, length2 - 1, length3 -1);
+        }
+
+        //Choice here is - if character matches in s3, which string it belongs to? - s1 or s2. We recurse for both
+        //Return if any of our choices was correct
+        return isFirstChoiceCorrect || isSecondChoiceCorrect;
+    }
+
+    //Same as brute force - just introduces caching
+    private boolean isInterleaveMemo(String s1, String s2, String s3, int length1, int length2, int length3, Boolean[][] memo) {
+        if(length3 != length1 + length2) return false;
+        if(length1 == 0 && length2 == 0 && length3 == 0) return true;
+
+        if(memo[length1][length2] != null) return memo[length1][length2];
+        boolean isFirstChoiceCorrect = false;
+        boolean isSecondChoiceCorrect = false;
+        if(length1 != 0 && s1.charAt(length1 - 1) == s3.charAt(length3 - 1)){
+            isFirstChoiceCorrect = isInterleaveMemo(s1,s2,s3,length1 -1, length2, length3 -1,memo);
+        }
+
+        if(length2 != 0 && s2.charAt(length2 - 1) == s3.charAt(length3 - 1)){
+            isSecondChoiceCorrect = isInterleaveMemo(s1,s2,s3,length1, length2 - 1, length3 -1,memo);
+        }
+
+        memo[length1][length2] =  isFirstChoiceCorrect || isSecondChoiceCorrect;
+
+        return memo[length1][length2];
+    }
+
+    private boolean isInterleaveTabulation(String s1, String s2, String s3, int length1, int length2, int length3, Boolean[][] dpTable) {
+        //Pre-Check
+        if(length3 != length1 + length2) return false;
+        if(length1 == 0 && length2 == 0 && length3 == 0) return true;
+
+        for(int i =0; i<= length1; i++){
+            for (int j= 0; j<=length2; j++){
+                //Base Conditions - If both strings are empty or either one string is empty
+                if(i ==0 && j ==0 ) dpTable[i][j]= true;
+                else if(i == 0 && s2.charAt(j-1) == s3.charAt(i + j - 1)) dpTable[i][j] = dpTable[i][j -1];
+                else if(j == 0 && s1.charAt(i-1) == s3.charAt(i + j - 1)) dpTable[i][j] = dpTable[i-1][j];
+                //If we have a choice here - take result of choices
+                else{
+                    boolean isFirstChoiceCorrect = false;
+                    boolean isSecondChoiceCorrect = false;
+                    if(i != 0 && s1.charAt(i-1) == s3.charAt(i + j - 1)) isFirstChoiceCorrect = dpTable[i-1][j];
+                    if(j != 0 && s2.charAt(j-1) == s3.charAt(i + j - 1)) isSecondChoiceCorrect = dpTable[i][j -1];
+
+                    dpTable[i][j] = isFirstChoiceCorrect || isSecondChoiceCorrect;
+                }
+
+            }
+        }
+        return dpTable[length1][length2];
+    }
+
 
 }
