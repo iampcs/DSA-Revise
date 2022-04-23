@@ -204,6 +204,9 @@ public class LongestCommonSubsequence {
 
     Observe how we are increasing count until our characters are matching and resetting once they stop matching. The maximum value here (3), will be
     our solution
+
+    A good way to understand this algorithm is - For all possible prefixes of S1 & S2 - We want to find the longest matching suffix -
+    This is explained beautifully here - https://www.youtube.com/watch?v=NvmJBCn4eQI&list=PL-Jc9J83PIiE-181crLG1xSIWhTGKFiMY&index=104
      */
     int longestCommonSubstrTabulation(String S1, String S2, int n, int m){
         Integer[][] dpTable = new Integer[n +1][m + 1];
@@ -471,7 +474,10 @@ public class LongestCommonSubsequence {
        This kind of questions are tricky - specially if you have already solved subsequence problems. Approach will be completely
        different here. We can solve this problem using two ways as both gives O(N^2 solution)
        1. Using DP- tabulation method
-       2. Using iteration - expand method - given a character expand left-right to check if it's a part of a palindrome 
+       2. Using iteration - expand method - given a character expand left-right to check if it's a part of a palindrome
+
+       We can also solve this using gap-method which fills the table diagonally - DynamicProgramming.MatrixChainMultiplication.createPalindromicTable
+       This approach is explained here - https://www.youtube.com/watch?v=WpYHNHofwjc&list=PL-Jc9J83PIiE-181crLG1xSIWhTGKFiMY&index=71
 
      */
     public String longestPalindrome(String s) {

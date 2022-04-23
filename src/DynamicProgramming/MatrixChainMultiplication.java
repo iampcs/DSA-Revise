@@ -18,12 +18,14 @@ We'll be given an array arr[ ] which represents the chain of matrices such that 
 MCM problems are about partitioning - Based on problem, we will partition the problem in sub-problems and then combine solutions from these sub-problems to calculate solution for
 current partition. Based on problem - we might need to go through all possible partitions to get our final solution.
 
+We can see here that solving this problem via recursion template is easy - adding memo to it makes the solution solve in O(N^3) - but solving it using tabulation method is not
+straight forward - We have to use gap method here to fill the table diagonally. This filling table diagonally makes sense if we have only one string/array input + we can't skip any
+input + some combinations don't make sense, so they will be zero or null - dpTable[M][N] saves solution for M&N, but sometimes M&N don't make valid problem set.
 
  */
 public class MatrixChainMultiplication {
     public static void main(String[] args) {
 
-        minCut("cdd");
     }
 
     /* Matrix chain multiplication - You're given an array `dims` of `n` positive integers, where matrix `M[i]` has dimension `dims[i-1] × dims[i]` for `i=1…n`. Determine the optimal parenthesization of the product of matrices `M[1…n]`.
@@ -184,12 +186,15 @@ public class MatrixChainMultiplication {
         return memo[start][end];
     }
 
-    //We will use suffix matching here - We will maintain an array dpTable[index] represent - minimum cut required to make all strings palindrome from (0 - index)
-    //Whenever we add a new character to our existing solution - suppose at index - J
-    //1. We will run a loop from J till I - where I goes from J till 1 - Why 1? Because we know dpTable[0] will be 0 - only single element
-    //   In this we will check (J till I) is palindrome? - If yes - We already have solution for dpTable[I] - our solution will be dpTable[I] + 1 - cut at I
-    //   We will find all such cuts and store the minimum of it
-    // This approach is explained - https://youtu.be/qmTtAbOTqcg?list=PL-Jc9J83PIiE-181crLG1xSIWhTGKFiMY&t=1843
+    /*
+    We will use suffix matching here - We will maintain an array dpTable[index] represent - minimum cut required to make all strings palindrome from (0 - index)
+    Whenever we add a new character to our existing solution - suppose at index - J
+    1. We will run a loop from J till I - where I goes from J till 1 - Why 1? Because we know dpTable[0] will be 0 - only single element
+        In this we will check (J till I) is palindrome? - If yes - We already have solution for dpTable[I] - our solution will be dpTable[I] + 1 - cut at I
+        We will find all such cuts and store the minimum of it
+    This approach is explained - https://youtu.be/qmTtAbOTqcg?list=PL-Jc9J83PIiE-181crLG1xSIWhTGKFiMY&t=1843
+    Time Complexity - O(N^2)
+     */
     private static int minCutOptimized(String s, Boolean[][] palindromicTable){
         int[] dpTable = new int[s.length()];
         for(int start = 1; start < s.length() ; start ++){
@@ -215,8 +220,6 @@ public class MatrixChainMultiplication {
         return dpTable[s.length() - 1];
     }
 
-
-
     //Create a palindromic table where palindromicTable[start][end] stores if string between A & B is palindrome
     private static Boolean[][] createPalindromicTable(String s) {
 
@@ -237,6 +240,9 @@ public class MatrixChainMultiplication {
         }
         return palindromicTable;
     }
+
+    //TODO : Boolean Parenthesization , Scrambled String, Egg dropping
+
 
 }
 
