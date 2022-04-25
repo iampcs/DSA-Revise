@@ -148,9 +148,7 @@ points :  N-1 * 2        0           F(N-1) + F(0)
       Just like the chord example - We can observe that a straight line - which will be used to create triangle - divides the polygon into
       smaller polygons - which we have already solved
      */
-    public int countPolygonTriangulation(int N){
-        return catlanNumber(N-2);
-    }
+    public int countPolygonTriangulation(int N){ return catlanNumber(N-2); }
 
 
 
