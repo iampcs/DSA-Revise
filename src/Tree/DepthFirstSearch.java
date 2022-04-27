@@ -1,6 +1,7 @@
 package Tree;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class DepthFirstSearch {
@@ -210,6 +211,162 @@ public class DepthFirstSearch {
         if((self && left) || (self && right) || (left && right)) LCA = root;
 
         return self || left || right;
+    }
+
+    /* Path Sum III - Given the root of a binary tree and an integer targetSum, return the number of paths where the sum of the values along the path equals targetSum.
+       The path does not need to start or end at the root or a leaf, but it must go downwards (i.e., traveling only from parent nodes to child nodes).
+       https://leetcode.com/problems/path-sum-iii/
+       This is a basic recursive problem with choices - We have two choices
+       1. Include current node in our solution path - We need to pass targetSum - root.val to subtrees
+       2. Exclude current node from solution path - In this case we need to pass original targetSum provided to subtrees
+     */
+    public int pathSumIII(TreeNode root, int sum) {
+        if (root == null) return 0;
+        //Total of : Include current node + Exclude current node
+        //We need to preserve sum in case we are not including current root, hence a separate method where we are modifying sum
+        return pathSumFrom(root, sum) + pathSumIII(root.left, sum) + pathSumIII(root.right, sum);
+    }
+
+    private int pathSumFrom(TreeNode node, int sum) {
+        if (node == null) return 0;
+        return (node.val == sum ? 1 : 0)
+                + pathSumFrom(node.left, sum - node.val) + pathSumFrom(node.right, sum - node.val);
+    }
+
+    /* Path Sum II - Given the root of a binary tree and an integer targetSum, return all root-to-leaf paths where the sum of the node values in the path equals targetSum.
+       Each path should be returned as a list of the node values, not node references.
+       https://leetcode.com/problems/path-sum-ii/
+
+       We will be using an arrayList to track path, if target sum is zero, we will add a copy to our solution. When we have processed both left and right
+       subtree, we will backtrack.
+       We can remove this backtracking at cost of space if we pass a copy of path to subtrees.
+
+     */
+
+    public List<List<Integer>> pathSumII(TreeNode root, int targetSum) {
+        List<List<Integer>> solution = new ArrayList<>();
+        if(root == null) return solution;
+
+        pathSumII(root,targetSum,solution, new ArrayList<Integer>());
+        return solution;
+
+    }
+
+    private void pathSumII(TreeNode root, int targetSum, List<List<Integer>> solution, ArrayList<Integer> currPath) {
+        if(root == null) return;
+
+        //We are at leaf and targetSum is zero - Add leaf to path, add this path to solution, remove leaf from path
+        if(root.left == null && root.right == null & root.val == targetSum){
+            currPath.add(root.val);
+            solution.add(new ArrayList(currPath));
+            //Backtrack
+            currPath.remove(currPath.size() - 1);
+            return;
+        }
+
+        //Add current root to path
+        currPath.add(root.val);
+
+        pathSumII(root.left, targetSum - root.val, solution, currPath);
+        pathSumII(root.right,targetSum - root.val, solution, currPath);
+
+        //Backtrack
+        currPath.remove(currPath.size() - 1);
+    }
+
+    /* Sum Root to Leaf Numbers - You are given the root of a binary tree containing digits from 0 to 9 only.Each root-to-leaf path in the tree represents a number.
+       For example, the root-to-leaf path 1 -> 2 -> 3 represents the number 123.
+       Return the total sum of all root-to-leaf numbers. Test cases are generated so that the answer will fit in a 32-bit integer.
+
+       Logic is simple - We pass current node value to left child and right child : If path 1->2 - We will pass 12 to both the child
+       When we encounter a leaf - will add this path to sum.
+
+     */
+    int sumNumbers = 0;
+    public int sumNumbers(TreeNode root) {
+        sumNumbersDFS(root, 0);
+        return sumNumbers;
+    }
+
+    private void sumNumbersDFS(TreeNode root, int val) {
+        if(root == null) return;
+        //Leaf node - add current path to sum
+        if(root.left == null && root.right == null){
+            //If we get 12 from parent, and current node is 3, number will be 123 = 12 * 10 + 3
+            sumNumbers += val * 10 + root.val;
+        }
+
+        //Pass current path number to subtrees
+        sumNumbersDFS(root.left, val * 10 + root.val);
+        sumNumbersDFS(root.right, val * 10 + root.val);
+    }
+
+    /* Validate Binary Search Tree - Given the root of a binary tree, determine if it is a valid binary search tree (BST).
+       A valid BST is defined as follows:
+       * The left subtree of a node contains only nodes with keys less than the node's key.
+       * The right subtree of a node contains only nodes with keys greater than the node's key.
+       * Both the left and right subtrees must also be binary search trees.
+       https://leetcode.com/problems/validate-binary-search-tree/
+
+       Every node will define boundaries for its subtrees - If any of those boundaries are broken - It's not a BST .
+       We give minValue and maxValue - root.val is implicit
+       minValue<---LeftSub tree--->root.val<---LeftSub tree--->maxValue
+     */
+    public boolean isValidBST(TreeNode root) {
+        //Single node is a BST
+        return isValidBST(root, Long.MIN_VALUE, Long.MAX_VALUE);
+    }
+
+    public boolean isValidBST(TreeNode root, long minVal, long maxVal) {
+        if (root == null) return true;
+
+        //Going outside/on boundary
+        if (root.val >= maxVal || root.val <= minVal) return false;
+        //Call subtrees to check if they are BST based on new minValue & maxValue
+        return isValidBST(root.left, minVal, root.val) && isValidBST(root.right, root.val, maxVal);
+    }
+
+    /* Construct Binary Tree from Preorder and Inorder Traversal - Given two integer arrays preorder and inorder where preorder is the preorder traversal of a binary tree and
+       inorder is the inorder traversal of the same tree, construct and return the binary tree.
+       https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/
+
+       Conditions for constructing a binary tree from traversals
+       1. One of the traversals should be in-order, else it's not possible to divide array into subtrees size
+       2. Traversals must consist of unique values.
+
+       How to build tree using inorder & preorder(postorder,levelOrder)
+       1. First element of preorder is root - create root node
+       2. Find that element in inorder - inorderRootIndex : this index divides our inorder into left subtree and right subtree <--left-->inorderRootIndex<--right-->
+       3. We now know the inorder traversal for left & right subtree, also their sizes - L & R
+       4. For preorder - roots are stored first then left subtree and then right subtree - So if there is a left subtree, its index will be on next of root index - 1st index - also it will be
+          L length long. Left Subtree - (1, 1 + L - 1), Right subtree will start from (1 + L, end)
+       5. Recursively do the same for root.left and root.right
+
+     */
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+
+        return buildTree(preorder, 0,preorder.length -1, inorder, 0, inorder.length-1);
+
+    }
+
+    private TreeNode buildTree(int[] preorder, int preStart, int preEnd, int[] inorder, int inStart, int inEnd) {
+        //Base condition
+        if(preEnd < preStart || inEnd < inStart) return null;
+        TreeNode root = new TreeNode(preorder[preStart]);
+
+        //We know root will fall between  inStart and inEnd only
+        int inorderRootIndex = inStart;
+        for(;inorderRootIndex < inEnd; inorderRootIndex++){
+            if(inorder[inorderRootIndex] == root.val) break;
+        }
+
+        int leftSubTreeSize = inorderRootIndex - inStart;
+
+        //Call for left subtree and right subtree with new preorder and postorder traversals
+        root.left = buildTree(preorder, preStart + 1, preStart + leftSubTreeSize, inorder, inStart, inorderRootIndex - 1);
+        root.right = buildTree(preorder, preStart + leftSubTreeSize + 1, preEnd, inorder, inorderRootIndex + 1, inEnd);
+
+        return root;
     }
 
 

@@ -2,6 +2,7 @@ package Tree;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 public class BreadthFirstSearch {
@@ -68,7 +69,35 @@ public class BreadthFirstSearch {
         }
 
         return solution;
+    }
 
+    /* Binary Tree Right Side View - Given the root of a binary tree, imagine yourself standing on the right side of it, return the values of the nodes you can see ordered from top to bottom.
+       https://leetcode.com/problems/binary-tree-right-side-view/
+       We put a null after each level, when polling from queue, just check if next element is null(even if the queue is empty - we will get null from peek)- it means this is the last element in this
+       level - store this in solution.
+
+     */
+    public List<Integer> rightSideView(TreeNode root) {
+        List<Integer> solution = new ArrayList<>();
+        if(root == null) return solution;
+
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.add(root);
+        queue.add(null);
+
+        while (!queue.isEmpty()){
+            TreeNode currNode = queue.poll();
+            if(currNode != null){
+                if(queue.peek() == null) solution.add(currNode.val);
+                if(currNode.left != null) queue.add(currNode.left);
+                if(currNode.right != null) queue.add(currNode.right);
+            }else {
+                if(!queue.isEmpty()) queue.add(null);
+            }
+        }
+
+
+        return solution;
 
     }
 
