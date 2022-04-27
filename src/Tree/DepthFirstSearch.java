@@ -100,7 +100,49 @@ public class DepthFirstSearch {
 
         return new int[]{isBalanced, currNodeHeight};
     }
+    /* Binary Tree Maximum Path Sum - A node can only appear in the sequence at most once. Note that the path does not need to pass through the root.
+       The path sum of a path is the sum of the node's values in the path.
+       Given the root of a binary tree, return the maximum path sum of any non-empty path.
+       https://leetcode.com/problems/binary-tree-maximum-path-sum/
 
+       Logic is similar to diameter of tree, each node will pass to its ancestor - the longest chain it is part of - either left or right
+       that node will also update maximum Binary Tree path sum if it has a greater than existing one.
+       We could have had an array of size two with first element tracking the longest chain and second tracking maximum Binary Tree path sum.
+       But there were complications with negative numbers and solution was getting complex. So storing maxPathSum in a global variable which each node can
+       update.
+
+       Note - When I say max sum chain - means it's a straight chain, it doesn't go from left to right - Chain at current root - Max(leftChain, rightChain) + root.value
+              When I say max sum path - means it's an upper semi eclipse, it goes from left to right and includes current root - leftChain + rightChain + root.value
+
+     */
+    public static int[] maxSumPath = new int[1];
+    public int maxPathSum(TreeNode root) {
+        //Storing the root as maxPathSum - this will be the case if tree has only node.
+        maxSumPath[0] = root.val;
+        maxPathSumDFS(root);
+        return maxSumPath[0];
+    }
+
+    //int[0] : contains max sum path of left subtree , int[1] : contains sum of maximum path
+    public int maxPathSumDFS(TreeNode root){
+        //Base condition - null root doesn't contribute to sum
+        if(root == null) return 0;
+
+        //Get max sum chain from left and right
+        int leftChain = maxPathSumDFS(root.left);
+        int rightChain = maxPathSumDFS(root.right);
+
+        //We don't need the chain if its returning negative sum - we already have root with us, this chain won't help
+        leftChain = Math.max(leftChain, 0);
+        rightChain = Math.max(rightChain, 0);
+
+        //Do we have a new max sum path ?
+        maxSumPath[0] = Math.max(maxSumPath[0], leftChain + rightChain + root.val);
+
+        // Return max chain from this current root
+        return root.val + Math.max(leftChain,rightChain);
+
+    }
 
     /* Binary Tree Paths - Given the root of a binary tree, return all root-to-leaf paths in any order.
        https://leetcode.com/problems/binary-tree-paths/
@@ -146,7 +188,29 @@ public class DepthFirstSearch {
         return left != null ? left : right;
     }
 
+    //p & q may be present - will return null in case either or both of them missing
+    //Static member to store solution
+    static TreeNode LCA = null;
+    public TreeNode lowestCommonAncestor2(TreeNode root, TreeNode p, TreeNode q) {
+        lowestCommonAncestorDFS(root,p,q);
 
+        return LCA;
+    }
+
+    public boolean lowestCommonAncestorDFS(TreeNode root, TreeNode p, TreeNode q) {
+        //Base condition
+        if(root == null) return false;
+
+        //Idea is similar to previous LCA - we are checking for condition 1,2 or 3 and returning to our parent if either is true.
+        boolean self = root.val == p.val || root.val == q.val;
+        boolean left = lowestCommonAncestorDFS(root.left, p, q);
+        boolean right = lowestCommonAncestorDFS(root.right, p, q);
+
+        //If any of three condition is true - We have our LCA
+        if((self && left) || (self && right) || (left && right)) LCA = root;
+
+        return self || left || right;
+    }
 
 
 }
