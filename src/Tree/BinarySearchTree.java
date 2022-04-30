@@ -1,7 +1,6 @@
 package Tree;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 
 /* Properties of BST
     1. The left subtree of a node contains only nodes with keys lesser than the node’s key.
@@ -134,6 +133,59 @@ public class BinarySearchTree {
 
        return root;
     }
+    /* Floor and Ceil in a Binary Search Tree - Given the root of a binary search tree (BST) and a tree node x, find the floor and ceiling of node x in the BST. If node x lies in the BST, then both floor and ceil are equal to that node;
+       otherwise, the ceil is equal to the next greater node (if any) in the BST, and the floor is equal to the previous greater node (if any) in the BST.
+       The solution should return the (floor, ceil) pair. If the floor or ceil doesn't exist, consider it to be null.
+       https://techiedelight.com/practice/?problem=FloorAndCeilII
+
+       It's similar to predecessorSuccessor if element is absent.
+     */
+    public static ArrayList<Node> findFloorAndCeil(Node root, Node key)
+    {
+        Node floor = null;
+        Node rootF = root;
+
+        Node ceil = null;
+        Node rootC = root;
+
+        ArrayList<Node> solution = new ArrayList<>();
+
+
+        while(rootF != null){
+            //Found element - this is floor - store and break this loop
+            if(key.data == rootF.data) {
+                floor = rootF;
+                break;
+            }
+            //Floor - we want an element just smaller than key, current root is greater - go left
+            else if(key.data < rootF.data) rootF = rootF.left;
+            //Found an element smaller than key - this could be our floor - Go right to check if there is something greater than current solution but smaller than key
+            else {
+                floor = rootF;
+                rootF = rootF.right;
+            }
+        }
+
+        while(rootC != null){
+            //Found element - this is ceil - store and break this loop
+            if(key.data == rootC.data) {
+                ceil = rootC;
+                break;
+            }
+            //Ceil - we want an element just greater than key, current root is smaller - go right
+            if(key.data > rootC.data) rootC = rootC.right;
+            //Found an element greater than key - this could be our ceil - Go left to check if there is something smaller than current solution but greater than key
+            else{
+                ceil = rootC;
+                rootC = rootC.left;
+            }
+        }
+
+        solution.add(floor);
+        solution.add(ceil);
+
+        return solution;
+    }
 
     /* Convert Sorted Array to Binary Search Tree - Given an integer array nums where the elements are sorted in ascending order, convert it to a height-balanced binary search tree.
        A height-balanced binary tree is a binary tree in which the depth of the two subtrees of every node never differs by more than one.
@@ -192,6 +244,99 @@ public class BinarySearchTree {
         if(root.val > Math.max(p.val,q.val)) return lowestCommonAncestor(root.left, p, q);
         //LCA on right subtree
         else return lowestCommonAncestor(root.right, p, q);
+    }
+    /* Kth Smallest Element in a BST - Given the root of a binary search tree, and an integer k, return the kth smallest value (1-indexed) of all the values of the nodes in the tree.
+       https://leetcode.com/problems/kth-smallest-element-in-a-bst/
+       A naive solution will be to do in-order traversal - which traverse in increasing order - and return as soon as we reach Kth node.
+       What if we want Kth  the largest element - same logic, just do reverse in-order - right-root-left
+
+     */
+    private static int kthSmallest = 0;
+    private static int K = 0;
+
+    public int kthSmallest(TreeNode root, int k) {
+        K = k;
+        kthSmallest(root);
+        return kthSmallest;
+    }
+
+    public void kthSmallest(TreeNode n) {
+        if (n.left != null) kthSmallest(n.left);
+        K--;
+        if (K == 0) {
+            kthSmallest = n.val;
+            return;
+        }
+        if (n.right != null) kthSmallest(n.right);
+    }
+
+    /*Binary Search Tree Iterator - Implement the BSTIterator class that represents an iterator over the in-order traversal of a binary search tree (BST)
+      https://leetcode.com/problems/binary-search-tree-iterator/
+
+      This can be achieved in two ways -
+      1. Create an in-order traversal array and use its iterator
+      2. Create a Stack - push all left elements to stack - when we call next() - pop stack and return top element (current lowest) and add its right children to stack.
+
+     */
+    class BSTIterator {
+        ArrayList<Integer> inOrder;
+        Iterator itr = inOrder.iterator();
+
+        public BSTIterator(TreeNode root) {
+            inOrder = new ArrayList<Integer>();
+            inOrderTraversal(root);
+        }
+
+        public int next() {
+            return (int) itr.next();
+        }
+
+        public boolean hasNext() {
+            return itr.hasNext();
+        }
+
+        public void inOrderTraversal(TreeNode root){
+            if(root == null) return;
+            inOrderTraversal(root.left);
+            inOrder.add(root.val);
+            inOrderTraversal(root.right);
+        }
+
+        private Stack<TreeNode> stack = new Stack<TreeNode>();
+
+        public void BSTIteratorStack(TreeNode root) {
+            pushAll(root);
+        }
+
+        /** @return whether we have a next smallest number */
+        public boolean hasNextStack() {
+            return !stack.isEmpty();
+        }
+
+        /** @return the next smallest number */
+        public int nextStack() {
+            TreeNode tmpNode = stack.pop();
+            pushAll(tmpNode.right);
+            return tmpNode.val;
+        }
+
+        private void pushAll(TreeNode node) {
+            for (; node != null; stack.push(node), node = node.left);
+        }
+    }
+
+
+    /* Two Sum IV - Input is a BST
+        https://leetcode.com/problems/two-sum-iv-input-is-a-bst/
+        Solved this like a regular two sum
+     */
+    Set<Integer> numbersPresent = new HashSet<>();
+    public boolean findTarget(TreeNode root, int k) {
+        if(root == null) return false;
+        if(numbersPresent.contains(k - root.val)) return true;
+        numbersPresent.add(root.val);
+
+        return findTarget(root.left,k) || findTarget(root.right,k);
     }
 
 
