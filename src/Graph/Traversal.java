@@ -1,8 +1,6 @@
 package Graph;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 
 public class Traversal {
     public static void main(String[] args) {
@@ -69,5 +67,89 @@ public class Traversal {
         }
         return bfsPath;
     }
+
+    /* Find if Path Exists in Graph - Given edges and the integers n, source, and destination, return true if there is a valid path from source to destination, or false otherwise.
+       https://leetcode.com/problems/find-if-path-exists-in-graph/
+       Will perform DFS from source to check if we will ever reach destination.
+     */
+    public boolean validPath(int n, int[][] edges, int source, int destination) {
+        boolean[] visited = new boolean[n];
+        ArrayList<ArrayList<Integer>> adjList = new ArrayList<>();
+        //Converting edges to adjList
+        for(int i = 0; i< n; i++){
+            adjList.add(new ArrayList<Integer>());
+        }
+        for(int[] edge : edges){
+            adjList.get(edge[0]).add(edge[1]);
+            adjList.get(edge[1]).add(edge[0]);
+        }
+        return validPath(n, adjList, source, destination, visited);
+
+    }
+
+    public boolean validPath(int n, ArrayList<ArrayList<Integer>> adjList, int source, int destination, boolean[] visited){
+        //We have reached destination
+        if(source == destination) return true;
+        //Mark this node as visited so we don't visit this again
+        visited[source] = true;
+        //For all neighbours of current node
+        for(int neighbourIndex = 0; neighbourIndex < adjList.get(source).size() ; neighbourIndex++){
+            Integer currentNeighbour = adjList.get(source).get(neighbourIndex);
+            //If we haven't visited this neighbour already
+            if(visited[currentNeighbour] == false){
+                //Check if there is a path from this neighbour to destination
+                boolean hasPath = validPath(n,adjList,currentNeighbour,destination,visited);
+                //We want to return from this loop of all neighbours as soon as we find a path, no need to evaluate further
+                if(hasPath) return true;
+            }
+        }
+        //Current node can't reach to destination
+        return false;
+    }
+
+    /* All Paths From Source to Target - Given a directed acyclic graph (DAG) of n nodes labeled from 0 to n - 1, find all possible paths from node 0 to node n - 1 and return them in any order.
+       The graph is given as follows: graph[i] is a list of all nodes you can visit from node i
+       https://leetcode.com/problems/all-paths-from-source-to-target/
+       Similar to previous problem - just that instead of returning true and stopping when we reach destination, we will store current path instead
+       Even though its mentioned here that graph is acyclic - we will solve it as a cyclic graph - to have a generic code
+     */
+    public List<List<Integer>> allPathsSourceTarget(int[][] graph) {
+        int vertices = graph.length;
+        List<List<Integer>> allPaths = new ArrayList<>();
+        boolean[] visited = new boolean[vertices];
+        allPathsSourceTarget(graph, 0, vertices - 1, visited, new ArrayList<Integer>(), allPaths);
+        return allPaths;
+    }
+
+    private void allPathsSourceTarget(int[][] graph, int start, int destination, boolean[] visited,
+                                      ArrayList<Integer> currPath, List<List<Integer>> allPaths) {
+        //We have reached destination - add destination itself to current path
+        //Add current path to list of all paths
+        //Backtrack after adding - as this same current path will be used again by some other flow
+        if(start == destination){
+            currPath.add(destination);
+            allPaths.add(new ArrayList<>(currPath));
+            currPath.remove(currPath.size() - 1);
+            return;
+        }
+
+        //mark current node as visited, add it to current path
+        visited[start] = true;
+        currPath.add(start);
+
+        //For all the neighbours of current node
+        for(int neighbourIndex = 0; neighbourIndex < graph[start].length ; neighbourIndex ++){
+            int currentNeighbour = graph[start][neighbourIndex];
+            //Perform DFS on neighbour if not visited
+            if(visited[currentNeighbour] == false){
+                allPathsSourceTarget(graph,currentNeighbour,destination,visited,currPath,allPaths);
+            }
+        }
+        //Backtrack - because we can visit this same node from some other path, remove current node from path while backtracking
+        visited[start] = false;
+        currPath.remove(currPath.size() - 1);
+
+    }
+
 }
 
