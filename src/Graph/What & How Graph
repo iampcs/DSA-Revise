@@ -1,0 +1,44 @@
+1. Graph consists of - Vertices(Nodes) and Edges. Edge is form(u,v), this is ordered in case of directed graph(di-graph) - means edge(u,v) is not same as
+   edge(v,u).
+2. Ways to represent graph
+    2.1  Adjacency Matrix - 2D array of size V x V where V is the number of vertices in a graph. adj[i][j] = 1 indicates that there is an edge from vertex i to vertex j.
+                            Adjacency matrix for undirected graph is always symmetric. If adj[i][j] = w, then there is an edge from vertex i to vertex j with weight w.
+                            Pros - Easier to implement and follow. Removing/Adding/Querying an edge takes O(1) time.
+                            Cons - Consumes more space O(V^2) even for sparse graph.
+    2.2  Adjacency List - An array of lists is used. The size of the array is equal to the number of vertices. An entry array[i] represents the list of vertices adjacent to the ith vertex.
+                          Pros - Saves space O(|V|+|E|).  In the worst case, there can be C(V, 2) number of edges in a graph thus consuming O(V^2) space.
+                                 Adding a vertex is easier.
+                          Cons - Querying edges can take O(V) time
+
+For any given problem - ask for
+    * Is the graph directed or undirected
+    * Are edges weighted ?
+    * Is it sparse or dense ?
+    * Should I use adjacency matrix or list to represent this?
+Based on above inputs we can choose an algorithm that best suits a problem
+
+Common Problems :
+1. Shortest path problem - Given a graph, find shortest path of edges from node A to B
+   Algorithms - BFS(unweighted), Dijkstra's, Bellman-Ford, Floyd-Warshall, A* etc
+2. Connectivity - Does there exist a path between node A and B
+   Algorithm - Union Find, any search algorithm like DFS,BFS
+3. Detect negative cycles - Does my weighted digraph have any negative cycles ?
+   Algorithm - Bellman-Ford, Floyd-Warshall
+4. Strongly connected components - Self contained cycles within a directed graph - where every vertex in a given cycle can reach every other vertex in same cycle.
+   Algorithm - Tarjan's , Kosaraju's
+5. Traveling Salesman - Given a graph, shortest possible route that visits each city exactly once and returns to the origin city.
+   Algorithm - Held-Karp, branch and bound and many approximation algorithms
+6. Bridges - A bridge/ cut edge is any edge in a graph whose removal increases the number of connected components. These are important because they often
+             hint at weak points, bottlenecks or vulnerabilities in a graph.
+7. Articulation points - An articulation point/ cut vertex is any node in a graph whose removal increases the number of connected components. These are important because they often
+                         hint at weak points, bottlenecks or vulnerabilities in a graph.
+8. Minimum Spanning Tree(MST) - It is a subset of edges of a connected, edge-weighted graph that connects all the vertices together, without any cycles and with
+                                minimum possible edge weight.
+   Algorithm - Kruskal's, Prims and Boruvka's
+9. Network Flow - With an infinite input source how much "flow" can we push through network from source to sink. Eg. Edges are roads with cars, flow represents max number of cars
+                  the road can sustain in traffic.
+   Algorithm - Ford-Fulkerson, Edmonds-Karp & Dinic's
+
+
+
+
