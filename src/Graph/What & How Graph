@@ -17,6 +17,11 @@ For any given problem - ask for
     * Should I use adjacency matrix or list to represent this?
 Based on above inputs we can choose an algorithm that best suits a problem
 
+An Euler path is a path that passes through every edge exactly once. If it ends at the initial vertex then it is an Euler cycle.
+A Hamiltonian path is a path that passes through every vertex exactly once (NOT every edge). If it ends at the initial vertex then it is a Hamiltonian cycle.
+
+NOte : In an Euler path you might pass through a vertex more than once. In a Hamiltonian path you may not pass through all edges.
+
 Common Problems :
 1. Shortest path problem - Given a graph, find shortest path of edges from node A to B
    Algorithms - BFS(unweighted), Dijkstra's, Bellman-Ford, Floyd-Warshall, A* etc
@@ -38,6 +43,7 @@ Common Problems :
 9. Network Flow - With an infinite input source how much "flow" can we push through network from source to sink. Eg. Edges are roads with cars, flow represents max number of cars
                   the road can sustain in traffic.
    Algorithm - Ford-Fulkerson, Edmonds-Karp & Dinic's
+10. Topological Sort - Topological Sort is used to find a linear ordering of elements that have dependencies on each other.
 
 
 
