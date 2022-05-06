@@ -10,7 +10,7 @@ import java.util.Arrays;
  */
 public class BinarySearch {
     public static void main(String[] args) {
-        findMin(new int[]{4,5,6,7,0,1,2});
+        singleNonDuplicate(new int[]{3,3,7,7,10,11,11});
     }
 
     /* Binary Search - Given an array of integers nums which is sorted in ascending order, and an integer target, write a function to search target in nums.
@@ -251,5 +251,65 @@ public class BinarySearch {
         }
 
         return ceil != -1 ? nums[ceil] : ceil;
+    }
+
+    /* Find Smallest Letter Greater Than Target - Given a characters array letters that is sorted in non-decreasing order and a character target,
+       return the smallest character in the array that is larger than target.
+       Note that the letters wrap around. For example, if target == 'z' and letters == ['a', 'b'], the answer is 'a'.
+       https://leetcode.com/problems/find-smallest-letter-greater-than-target/
+
+       This problem is similar to ceil - only difference - we want the next element - so if we find a potential solution - letters[mid] > target we store the potential
+       solution and traverse left
+       Else we traverse right - also in case of letters[mid] == target
+       Also we will always have a solution here because of character wrapping here - So we can take modulo if ceil instead of ceil.
+     */
+    public char nextGreatestLetter(char[] letters, char target) {
+        int ceil = 0;
+        int start = 0;
+        int end = letters.length - 1;
+        while (start <= end){
+            int mid = start + (end - start)/2;
+
+            if(letters[mid] > target){
+                ceil = mid;
+                end = mid - 1;
+            }
+            else {
+                start = mid + 1;
+            }
+        }
+        return letters[ceil % letters.length];
+    }
+
+    /* Single Element in a Sorted Array - You are given a sorted array consisting of only integers where every element appears exactly twice, except for one element which appears exactly once.
+       Return the single element that appears only once.
+       https://leetcode.com/problems/single-element-in-a-sorted-array/
+       Array is sorted so that's a hint to use binary search. Now we have to find this element based on a property - that it is the only non-duplicated element means element on its left
+       and right are different - that our equivalent to comparing middle element in plain binary search.
+       Now how should we partition based on mid-comparison? If we have a sorted array with each number occurring twice - the number at even index will be same as index - 1 (except 0)
+       also if index is odd, we will get same number at index + 1(except end). We will use these conditions only to decide if we should go left or right
+     */
+    public static int singleNonDuplicate(int[] nums) {
+        int start = 0;
+        int end = nums.length - 1;
+
+        while (start <= end){
+            //This is for case having single element
+            if(start == end ) return nums[start];
+            int mid = start + (end - start)/2;
+
+            //Taking care of IndexOutOfBound case and comparing element with its left & right - if they are diff, we found our element
+            if(mid > start && mid < end && nums[mid - 1] != nums[mid] && nums[mid+1] != nums[mid]) return nums[mid];
+            //Checking if mid is even or odd and then comparing respective neighbours to decide where to go
+            //Eg. mid = 2 , nums = [0,0,1,1,2] , we are checking next element - its equal - our start will be indexed 4
+            if(mid % 2 == 0 && nums[mid] == nums[mid + 1]) start = mid + 2;
+            //Eg. mid = 3, [0,0,1,1,2], we are checking previous element - its equal - our start will be indexed 4
+            else if(mid % 2 != 0 && nums[mid] == nums[mid - 1]) start = mid + 1;
+            //If it's not equal - that single number be on left
+            // //Eg. mid = 5, [0,0,1,1,2,5,5], we are checking previous element - it's not equal  - our end will be indexed 5
+            else end = mid;
+        }
+
+        return nums[0];
     }
 }
