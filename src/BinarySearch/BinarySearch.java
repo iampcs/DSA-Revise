@@ -520,5 +520,12 @@ public class BinarySearch {
         }
         return maxPile;
     }
+    /*  Median of Two Sorted Arrays - Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays.
+        The overall run time complexity should be O(log (m+n)).
+        https://leetcode.com/problems/median-of-two-sorted-arrays/
+
+        It's very difficult to come up with this solution - we will be using the soul behind binary search here
+        Explanation - https://www.youtube.com/watch?v=q6IEA26hvXc&list=PLot-Xpze53leNZQd0iINpD-MAhMOMzWvO&index=13
+     */
 
 }
