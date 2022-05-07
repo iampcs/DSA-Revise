@@ -1,16 +1,24 @@
 package BinarySearch;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.OptionalInt;
 
 /* Whenever we are given a sorted Array or LinkedList or Matrix, and we are asked to find a certain element, the best algorithm we can use is the Binary Search
    It's not always the case that DS will be linearly sorted, there could be variations - but even then we can use BinarySearch to optimize the solution from O(N) to O(logN).
    Although the algorithm is simple, we are prone to make Off By One error a lot - so take special care of indexes.
 
+   Sometimes binary search can be used to optimize a brute force solution - Suppose for a problem - we have no other way to solve it other than trying all possible solution from
+   (min to max). In this case our complexity will be O( max * something), we can optimize this a bit by not trying from min to max but apply binary search on this range to find
+   optimal solution.
+   So instead of going - min , min + 1 . . . max -1, max
+   We go - (min + max)/2 . . (min + max)/2 +/- 1
+   This will reduce our complexity to O(log(max) * something)
+
  */
 public class BinarySearch {
     public static void main(String[] args) {
-        singleNonDuplicate(new int[]{3,3,7,7,10,11,11});
     }
 
     /* Binary Search - Given an array of integers nums which is sorted in ascending order, and an integer target, write a function to search target in nums.
@@ -41,6 +49,15 @@ public class BinarySearch {
         if(nums[mid] == target) return  mid;
         else if(nums[mid] > target) return binarySearch(nums, start, mid - 1, target);
         else return binarySearch(nums,mid + 1, end, target);
+    }
+
+    public int binarySearchDescending(int[] nums, int start , int end , int target){
+        if(start > end) return -1;
+        int mid = start + (end - start)/2;
+
+        if(nums[mid] == target) return  mid;
+        else if(nums[mid] < target) return binarySearchDescending(nums, start, mid - 1, target);
+        else return binarySearchDescending(nums,mid + 1, end, target);
     }
 
     /* Find First and Last Position of Element in Sorted Array - Given an array of integers nums sorted in non-decreasing order, find the starting and ending position of a given target value.
@@ -312,4 +329,196 @@ public class BinarySearch {
 
         return nums[0];
     }
+    /* Find position of an element in a sorted array of infinite numbers
+       In practice there is no, infinite array - but these questions are interesting and can be mostly asked in 1:1 interviews - this question basically boils down to
+       find an element in a sorted array where we don't know end.
+       How will our binarySearch work without end? One approach could be set a random end - lets suppose index 1, now compare :
+       1. If target is less than this end - perform binarySearch for (start,end)
+       2. If target is greater than array[end], shift end to a farther position - lets say end * 2 , and make start as end + 1.
+       3. Repeat 1 & 2
+     */
+     int findPos(int arr[],int key){
+        int start = 0;
+        int end = 1;
+
+        while(key > arr[end]){
+            start = end;
+            end = end * 2;
+        }
+        return binarySearch(arr, start, end, key);
+    }
+
+    /* Find Peak Element - A peak element is an element that is strictly greater than its neighbors.
+       Given an integer array nums, find a peak element, and return its index. If the array contains multiple peaks, return the index to any of the peaks.
+       You may imagine that nums[-1] = nums[n] = -∞.
+       https://leetcode.com/problems/find-peak-element/
+
+       We can use binary search here as we want to return only one peak element index. Just like in binary search, we will find middle index - compare it with target - target is a property here -
+       target - element should be strictly greater than its neighbours.
+       Based on result of comparison we have three choices :
+       1. mid-element satisfies target property - return mid
+       2. mid-element is smaller than its right neighbour - peak could be there on right
+       3. mid-element is smaller than its left neighbour - peak could be there on left
+
+       This solution also solve problem like - Bitonic Point :  Given an array arr of n elements which is first increasing and then may be decreasing, find the maximum element in the array.
+       https://practice.geeksforgeeks.org/problems/maximum-value-in-a-bitonic-array3001/1#
+
+       In a Bitonic array - there will be only one peak - which is also the maximum
+     */
+    public int findPeakElement(int[] nums) {
+        int start = 0;
+        int end = nums.length - 1;
+        int peakElement = 0;
+
+        while(start <= end){
+            //Base condition when array size is 1
+            if(start == end ) return start;
+            int mid = start + (end - start)/2;
+            //Edge case - if mid is at 0 - we only need to compare it with right neighbour
+            if(mid == 0){
+                if(nums[mid] > nums[mid + 1]) return mid;
+                else start = mid + 1;
+            }
+            //Edge case - if mid is at end - we only need to compare it with left neighbour
+            else if(mid == nums.length - 1){
+                if(nums[mid] > nums[mid - 2]) return mid;
+                else end = mid - 1;
+            }
+            else{
+                //Case 1
+                if(nums[mid] > nums[mid - 1] && nums[mid] > nums[mid + 1]) return mid;
+                //Case 2
+                else if(nums[mid + 1] >= nums[mid]) start = mid + 1;
+                //Case 3
+                else end = mid - 1;
+            }
+        }
+
+        //Code won't come here - we can make use of this return if we break from while as soon as we have a peak index.
+        return peakElement;
+    }
+
+    /* Search in Bitonic Array - Given a bitonic sequence A of N distinct elements, write a program to find a given element B in the bitonic sequence in O(logN) time.
+       https://www.interviewbit.com/problems/search-in-bitonic-array/
+       A peak element divides a bitonic array into two arrays of increasing and decreasing sub-arrays. We can find peak element index and run binary search on both the sub-arrays.
+
+     */
+    public int solve(ArrayList<Integer> A, int B) {
+        int[] nums = new int[A.size()];
+        for(int i = 0; i < A.size(); i++) nums[i] = A.get(i);
+
+        int peak = findPeakElement(nums);
+        int leftIndex = binarySearch(nums, 0, peak, B);
+        int rightIndex = binarySearchDescending(nums, peak + 1, A.size() - 1, B);
+
+        return  leftIndex != -1 ? leftIndex : rightIndex;
+    }
+
+    /* Search a 2D Sorted Matrix - Write an efficient algorithm that searches for a value target in an m x n integer matrix. This matrix has the following properties:
+        1. Integers in each row are sorted from left to right.
+        2. The first integer of each row is greater than the last integer of the previous row.
+        https://leetcode.com/problems/search-a-2d-matrix/
+        There are two ways to solve this problem
+        1. Use the soul behind binarySearch - eliminate search space based on a comparison
+        2. Use 2D array as 1D array and perform simple binary search
+
+     */
+
+    public boolean searchMatrix(int[][] matrix, int target) {
+        //We are taking mid as top right element & eliminate a row or column based on comparison result
+        //We will be traversing in left-down direction - mid is matrix[rowIndex][colIndex]
+        int rowIndex = 0;
+        int colIndex  = matrix[0].length - 1;
+        boolean isPresent = false;
+
+        while (rowIndex < matrix.length &&  colIndex >= 0){
+            //Found element return
+            if(matrix[rowIndex][colIndex] == target) return true;
+            //mid is greater than target - we know any element below mid can't be target - mid column eliminated
+            if(matrix[rowIndex][colIndex] > target) colIndex -= 1;
+            //mid is smaller than target - as we are traversing from right to left - we know any element left of current row can't be target - current row eliminated
+            else rowIndex += 1;
+        }
+        return isPresent;
+    }
+
+    /* This on is difficult to think on spot - but can be deduced if we have a matrix in front of us.
+       [1, 3, 5, 7],
+       [10,11,16,20],
+       [23,30,34,60]
+       If we consider the above matrix of size RxC as 1D array and traverse row by row- starting element is 0(position 0) and end element is 60(position - 11)
+       How can we represent an element at position X in 2D matrix? Index of X will [X/C][X%C] - this can also be deduced while looking into matrix.
+       So an element at position 4 (10), in 1D array will be at index [4/4][4%4] or [1][0].
+     */
+    public boolean searchMatrix2Dto1D(int[][] matrix, int target) {
+        if (matrix == null || matrix.length == 0) {
+            return false;
+        }
+        int start = 0, rows = matrix.length, cols = matrix[0].length;
+        int end = rows * cols - 1;
+        while (start <= end) {
+            int mid = (start + end) / 2;
+            if (matrix[mid / cols][mid % cols] == target) {
+                return true;
+            }
+            if (matrix[mid / cols][mid % cols] < target) {
+                start = mid + 1;
+            } else {
+                end = mid - 1;
+            }
+        }
+        return false;
+    }
+
+    /* Koko Eating Bananas - Koko loves to eat bananas. There are n piles of bananas, the ith pile has piles[i] bananas. The guards have gone and will come back in h hours.
+    Koko can decide her bananas-per-hour eating speed of k. Each hour, she chooses some pile of bananas and eats k bananas from that pile. If the pile has less than k bananas,
+    she eats all of them instead and will not eat any more bananas during this hour. Koko likes to eat slowly but still wants to finish eating all the bananas before the guards return.
+    Return the minimum integer k such that she can eat all the bananas within h hours.
+    https://leetcode.com/problems/koko-eating-bananas/
+
+    This is one of those questions where it's not very intuitive to use binary search - our algorithm will be bruteforce - but we can use binary search to limit possible input
+    space for brute force using binarySearch.
+    Solution is beautifully explained - https://www.youtube.com/watch?v=U2SozAs9RzA&list=PLot-Xpze53leNZQd0iINpD-MAhMOMzWvO&index=11
+
+    There are similar problems following this approach of limiting brute force range and apply binary search on it
+    Allocate minimum number of pages - https://practice.geeksforgeeks.org/problems/allocate-minimum-number-of-pages0937/1/
+        In above questions we can range brute force by number of maximum number of pages - and perform binarySearch on this range to check if mid - satisfies condition
+     */
+    public int minEatingSpeed(int[] piles, int H) {
+        //Monkey has to eat a minimum of 1 banana/hr to eat all, maximum if it can eat the max lot size, its guaranteed to finish all in time
+        int min = 1, max = getMaxPile(piles);
+
+        // Binary search to find the smallest valid min.
+        while (min <= max) {
+            int mid = min + (max - min) / 2;
+
+            if (canEatAll(piles, mid, H)) {
+                max = mid - 1;
+            } else {
+                min = mid + 1;
+            }
+        }
+
+        return min;
+    }
+    // Check if the monkey can eat all piles with given rate and hour
+    private boolean canEatAll(int[] piles, int K, int H) {
+        int countHour = 0; // Hours it will take to eat all bananas at speed K.
+
+        for (int pile : piles) {
+            countHour += pile / K;
+            if (pile % K != 0)
+                countHour++;
+        }
+        return countHour <= H;
+    }
+    // Get max value in pile
+    private int getMaxPile(int[] piles) {
+        int maxPile = Integer.MIN_VALUE;
+        for (int pile : piles) {
+            maxPile = Math.max(pile, maxPile);
+        }
+        return maxPile;
+    }
+
 }
