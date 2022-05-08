@@ -2,6 +2,7 @@ package Stack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Stack;
 
 /* Stack questions will always be optimization problems - These problems could also be solved using brute-force, but with stacks we can do this
@@ -11,7 +12,7 @@ import java.util.Stack;
 
 public class Stacks {
     public static void main(String[] args) {
-
+        carFleet(10,new int[]{6,8}, new int[]{3,2});
 
     }
 
@@ -181,13 +182,94 @@ public class Stacks {
         return maxArea;
 
     }
+    /* Trapping Rain Water - Given n non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it can trap after raining.
+       Check diagram in problem to understand the problem clearly - https://leetcode.com/problems/trapping-rain-water/
+       We can solve this by adding up trapped water over every index - water will be trapped over an index(building) only if there exist a building taller in left & right of current
+       building. Also water will only go till height of min(leftTaller,rightTaller) and water will be stored above building - So water stored : min(leftTaller,rightTaller) - height(currentBuilding)
+       If there are no taller building on left or right side - we will have -1 - we will only consider a building if its has non-negative value on both side.
+
+       Note: Here we want the tallest building on right and left, not the nearest tallest building - So we will add a building to stack only if there is no taller building
+       available - because of this our stack will either be empty or contain almost one element - This gives us a chance to replace Stack with a variable instead, which will
+       optimize for space complexity but not time. Here we will be using stacks only.
+     */
+    public int trap(int[] heights) {
+        int trappedWater = 0;
+        int[] rightTaller = new int[heights.length];
+        int[] leftTaller = new int[heights.length];
+        Stack<Integer> stack = new Stack<>();
+
+        for(int index = heights.length - 1; index >= 0; index--){
+            //Remove everything which is smaller or equal to current building
+            while (!stack.isEmpty() && stack.peek() <= heights[index]) stack.pop();
+            //Stack is empty - means this is the tallest building till now, add it to stack
+            if(stack.isEmpty()) {
+                stack.push(heights[index]);
+                rightTaller[index] = -1;
+            }
+            //A taller building exist - populate rightTaller with taller building - We don't need to add currentBuilding to stack as there already is a taller building to right
+            else rightTaller[index] = stack.peek();
+
+
+        }
+
+        stack.clear();
+
+        for(int index = 0; index < heights.length; index++){
+            while (!stack.isEmpty() && stack.peek() <= heights[index]) stack.pop();
+            //There is no taller building to left - add current building as tallest building
+            if(stack.isEmpty()) {
+                stack.push(heights[index]);
+                leftTaller[index] = -1;
+            }
+            //Taller building exist on left - populate leftTaller array - no need to add current building to stack as it can never be a solution
+            else leftTaller[index] = stack.peek();
+
+
+            //If there exist a taller building to left and right - add trapped water
+            if(rightTaller[index] != -1 && leftTaller[index] != -1){
+                trappedWater += Math.min(rightTaller[index], leftTaller[index]) - heights[index];
+            }
+        }
+
+        return trappedWater;
+    }
+    /* Car Fleet - https://leetcode.com/problems/car-fleet/
+       This question can be reduced to a Stack greater to right question - but this idea won't come to mind right away
+       Can watch this -  https://www.youtube.com/watch?v=Pr6T-3yB9RM
+       To understand the approach we took
+     */
+    public static int carFleet(int target, int[] position, int[] speed) {
+
+        Stack<int[]> stack = new Stack<>();
+        //Want cars in order of positions from right to left - int[0] : position , int[1] : speed
+        PriorityQueue<int[]> priorityQueue = new PriorityQueue<int[]>((a,b) -> b[0] - a[0]);
+        for(int index = 0; index < position.length; index++)  priorityQueue.add(new int[]{position[index],speed[index]});
+
+        while (!priorityQueue.isEmpty()){
+            int[] currCar = priorityQueue.poll();
+            //We add a carFleet to stack only if previous fleet has time lower than current fleet - means they will never intersect to become a single fleet.
+            if(stack.isEmpty()) stack.add(currCar);
+            else {
+                //A Java thing - we need to ass this type case here - else division result will be int and then converted to float.
+                float currCarTime = (float) (target - currCar[0])/currCar[1];
+                float topCarTime = (float) (target - stack.peek()[0])/ stack.peek()[1];
+
+                if(currCarTime > topCarTime) stack.add(currCar);
+            }
+        }
+
+        return stack.size();
+    }
 
 
     /* Valid Parentheses - Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.
        An input string is valid if:
         Open brackets must be closed by the same type of brackets.
         Open brackets must be closed in the correct order.
+        https://leetcode.com/problems/valid-parentheses/
 
+        This kind of questions are easy to understand, and we will know that want Stack here.
+        Similar question - https://leetcode.com/problems/evaluate-reverse-polish-notation/
      */
     public boolean isValid(String s) {
         Stack<Character> stack = new Stack<>();
