@@ -12,6 +12,7 @@ import java.util.Stack;
 public class Stacks {
     public static void main(String[] args) {
 
+
     }
 
     /* Next Greater Element to Right - Given an array arr[ ] of size N having distinct elements,
@@ -102,6 +103,83 @@ public class Stacks {
             stack.push(new int[]{price, span});
             return span;
         }
+    }
+
+    /* Largest Rectangle in Histogram - Given an array of integers heights representing the histogram's bar height where the width of each bar is 1, return the area of the largest rectangle in the histogram.
+       https://leetcode.com/problems/largest-rectangle-in-histogram/
+       Eg. heights = [2,1,5,6,2,3] Output: 10
+       Lets suppose we want to find what is the maximum area that can be drawn from each index ? Suppose from index 2(5), For that we need to expand it in both direction -
+       we can only expand if neighbours are greater/same height as current index. For we can expand to index 3(6), but not to index 1(1). So our max height at current index(2)
+       will be arr[currentIndex] * Width(expanded)
+       In simple terms, we need to find the first smallest element in both direction, we can expand till smallerIndex - 1.
+       So, calculate - leftSmaller & rightSmaller to get width and multiply by currentIndex height to get max rectangle area at current index. Max of all indexes will be our solution
+
+       Note: Only difference here is - a case when we don't find left/right smaller - in previous questions we were asked to assign 0/-1 to those, here we will assign indexes (-1 & length)
+       for left & right misses - assuming index -1 & length will have 0 building heights.
+       Note: We could eliminate Stack here and use rightSmaller and leftSmaller arrays itself to calculate next but that will defeat the purpose of Stacks which we are using here
+       It could be done for space optimization and is out of scope for now.
+     */
+    public static int largestRectangleArea(int[] heights) {
+        int maxArea = 0;
+        int leftSmaller[] = new int[heights.length];
+        int rightSmaller[] = new int[heights.length];
+        Stack<Integer> stack = new Stack<>();
+
+        //Calculating rightSmaller
+        for(int index = heights.length - 1; index >=0 ; index--){
+            while (!stack.isEmpty() && heights[stack.peek()] >= heights[index]) stack.pop();
+            //Assigning length index for elements having no smaller to right
+            if(stack.isEmpty()) rightSmaller[index] = heights.length;
+            else rightSmaller[index] = stack.peek();
+
+            stack.push(index);
+        }
+
+        stack.clear();
+        //Calculating leftSmaller and area for current index
+        for(int index = 0; index < heights.length; index++){
+            while (!stack.isEmpty() && heights[stack.peek()] >= heights[index]) stack.pop();
+            //Assigning -1 to elements having no smaller to left
+            if(stack.isEmpty()) leftSmaller[index] = -1;
+            else leftSmaller[index] = stack.peek();
+
+            stack.push(index);
+
+            //Area = currentHeight * Width
+            int currentIndexArea = heights[index] * (rightSmaller[index] - leftSmaller[index] - 1);
+            maxArea = Math.max(maxArea, currentIndexArea);
+        }
+        return maxArea;
+
+    }
+    /* Maximal Rectangle - Given a rows x cols binary matrix filled with 0's and 1's, find the largest rectangle containing only 1's and return its area.
+       https://leetcode.com/problems/maximal-rectangle/
+
+       Although this problem looks different, but it's an extension of largestRectangleArea only. If we consider each row as base, we can get building heights for each row
+       and convert this to largestRectangleArea problem. Our solution will be max of all such rows - Lets see an example of 2D binary matrix to largestRectangleArea
+       Eg.   2D  Binary Matrix          1D building heights
+           ["1","0","1","0","0"],          [1,0,1,0,0]
+           ["1","0","1","1","1"],          [2,0,2,1,1]
+           ["1","1","1","1","1"],          [3,1,3,2,2]
+           ["1","0","0","1","0"]           [4,0,0,3,0]  //Building can't be in air - We add to height of previous base height - only if we have a 1 in current place
+
+     */
+    public static int maximalRectangle(char[][] matrix) {
+        int maxArea = 0;
+        int[][] floorMatrix = new int[matrix.length][matrix[0].length];
+        //Converting 2D matrix to Rows * 1D arrays
+        for(int row = 0 ;row < matrix.length; row++){
+            for(int col = 0; col < matrix[0].length; col++){
+                if(row == 0) floorMatrix[row][col] = Character.getNumericValue(matrix[row][col]);
+                else if(matrix[row][col] == '1') floorMatrix[row][col] = 1 + floorMatrix[row - 1][col];
+                else floorMatrix[row][col] = 0;
+            }
+            //Calculate max area of each row
+            maxArea = Math.max(maxArea,largestRectangleArea(floorMatrix[row]));
+        }
+
+        return maxArea;
+
     }
 
 
