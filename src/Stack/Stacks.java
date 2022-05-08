@@ -7,7 +7,8 @@ import java.util.Stack;
 
 /* Stack questions will always be optimization problems - These problems could also be solved using brute-force, but with stacks we can do this
    in linear time. First few problems will cover basic on how to think in terms of stacks - how we can save on multiple traversal costs.
-   Using this basics we will try to solve actual problems
+   Using this basics we will try to solve actual problems.
+   Note: If in a problem - we observe that we only are concerned about top/most recent elements only to make a decision - this could be a hint to use a Stack.
  */
 
 public class Stacks {
@@ -268,7 +269,7 @@ public class Stacks {
         Open brackets must be closed in the correct order.
         https://leetcode.com/problems/valid-parentheses/
 
-        This kind of questions are easy to understand, and we will know that want Stack here.
+        This kind of questions are easy to understand, and we will know that we want Stack here.
         Similar question - https://leetcode.com/problems/evaluate-reverse-polish-notation/
      */
     public boolean isValid(String s) {

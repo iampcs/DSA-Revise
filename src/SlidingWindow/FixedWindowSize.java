@@ -189,7 +189,7 @@ public class FixedWindowSize {
         int start=0,end = 0;
         // Just like printFirstNegativeInteger question, we will be maintaining a special queue which always fetch us
         // maximum number in current window - We need to maintain this queue
-        //This queue contains indexes only - not actual numbers
+        // contains indexes only - not actual numbers
         ArrayDeque<Integer> queue = new ArrayDeque<>();
 
         while(end < nums.length){
@@ -212,7 +212,7 @@ public class FixedWindowSize {
                 //Calculate Solution
                 solution[start] = nums[queue.getFirst()];
 
-                //If start contains the max number for current window, remove start from queue - now second largest number
+                //If start contains the max number for current window, remove start from queue - now second-largest number
                 // will be the max for current queue
                 if(start == queue.getFirst()) queue.removeFirst();
 
