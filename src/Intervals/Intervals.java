@@ -330,12 +330,65 @@ public class Intervals {
        The Intervals is an 1d-array. Each two numbers shows an interval. For example, [1,2,8,10] represents that the employee works in [1,2] and [8,10].
        Also, we wouldn't include intervals like [5, 5] in our answer, as they have zero length.
        https://www.lintcode.com/problem/850/
+
+       One plain solution will be to merge all intervals into a sorted-by-start time list - then eliminate - check if two intervals are overlapping - if not, store free time between them
+       This algorithm will work in O(NlogN) time - due to sorting.
+       Can we do better? We know that for an employee intervals will always be sorted - can we use this to our advantage?
+       1. We can use a minHeap here - which will be sorted based on start time
+       2. Now we will add first interval of each employee - this will guarantee us that minHeap top will be the element with the smallest start
+       3. Now we want the second-smallest start to compare it with - its possible that second-smallest start is inside minHeap already - its also possible its next interval of the poped employee interval
+       4. So we will add next interval of every poped employee interval and insert it to minHeap - now we are guaranteed to have the smallest start back on top of minHeap
+       5. From here onwards It's same as sorted Array - because our heap size will be atMax K and we will be inserting/poping N intervals - voila - O(NlogK)
+
      */
     public List<Interval> employeeFreeTime(int[][] schedule) {
        List<Interval> freeTime = new ArrayList<>();
+       //We created a class - EmployeeInterval which will store current employee index interval index and interval
+       //This is a minHeap sorted by start time
+       PriorityQueue<EmployeeInterval> minHeap = new PriorityQueue<>(Comparator.comparingInt(a -> a.interval.start));
 
+       //Add first interval of every employee
+       for (int employee = 0; employee < schedule.length; employee++){
+           minHeap.add(new EmployeeInterval( new Interval(schedule[employee][0],schedule[employee][1]), employee, 0));
+       }
+       //Making top interval as first interval to compare others with
+       Interval previousInterval = minHeap.peek().interval;
+       while (!minHeap.isEmpty()){
+
+           EmployeeInterval topEmployee = minHeap.poll();
+
+           //Non-overlapping condition - add to free time
+           if(previousInterval.end < topEmployee.interval.start)
+               freeTime.add(new Interval(previousInterval.end, topEmployee.interval.start));
+
+           // As we will only compare next start with previous end to compare overlapping condition, we will choose the previous which has the highest end value
+           if(previousInterval.end < topEmployee.interval.end)
+               previousInterval = topEmployee.interval;
+
+           //Adding next interval of current interval employee if it exists
+           //These indexes might be confusing - better to calculate this with a pen and paper
+           if(topEmployee.intervalIndex * 2 + 2 < schedule[topEmployee.employeeIndex].length ){
+                minHeap.add(new EmployeeInterval( new Interval(schedule[topEmployee.employeeIndex][(topEmployee.intervalIndex + 1) * 2],
+                                                               schedule[topEmployee.employeeIndex][(topEmployee.intervalIndex + 1) * 2 + 1]),
+                                                               topEmployee.employeeIndex, topEmployee.intervalIndex + 1));
+           }
+       }
        return freeTime;
     }
+
+    class EmployeeInterval{
+        Interval interval;
+        int employeeIndex;
+        int intervalIndex;
+
+        public EmployeeInterval(Interval interval, int employeeIndex, int intervalIndex){
+            this.interval = interval;
+            this.employeeIndex = employeeIndex;
+            this.intervalIndex = intervalIndex;
+        }
+    }
+
+
 
     public class Interval {
         int start, end;
@@ -345,23 +398,5 @@ public class Intervals {
         }
     }
 
-    /* Minimum Interval to Include Each Query - You are given a 2D integer array intervals, where intervals[i] = [lefti, righti] describes the ith interval starting at lefti and ending at righti (inclusive).
-       The size of an interval is defined as the number of integers it contains, or more formally righti - lefti + 1.
-       You are also given an integer array queries. The answer to the jth query is the size of the smallest interval i such that lefti <= queries[j] <= righti. If no such interval exists, the answer is -1.
-       Return an array containing the answers to the queries.
-       Eg.  Input: intervals = [[1,4],[2,4],[3,6],[4,4]], queries = [2,3,4,5]
-            Output: [3,3,1,4]
-            Explanation: The queries are processed as follows:
-                - Query = 2: The interval [2,4] is the smallest interval containing 2. The answer is 4 - 2 + 1 = 3.
-                - Query = 3: The interval [2,4] is the smallest interval containing 3. The answer is 4 - 2 + 1 = 3.
-                - Query = 4: The interval [4,4] is the smallest interval containing 4. The answer is 4 - 4 + 1 = 1.
-                - Query = 5: The interval [3,6] is the smallest interval containing 5. The answer is 6 - 3 + 1 = 4.
-       https://leetcode.com/problems/minimum-interval-to-include-each-query/
-     */
-    public int[] minInterval(int[][] intervals, int[] queries) {
-        int[] minInterval = new int[queries.length];
-
-        return minInterval;
-    }
 
 }
