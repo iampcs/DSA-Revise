@@ -120,20 +120,131 @@ public class DataStructureUsingLinkedList {
    The functions get and put must each run in O(1) average time complexity.
 
    https://leetcode.com/problems/lfu-cache/
+   We will be implementing this approach - https://www.youtube.com/watch?v=0PSB9y8ehbk
+   Will have two HashMap - One containing - (key,value) pair and another containing (frequency, [nodes]) - frequency and list of nodes with that frequency.
+   In summary :
+   1. Increase frequency of a node(key,value) when we are getting, putting or updating it. Move it in frequencyMap to next frequency
+   2. Maintain current minimum frequency - In case of size overflow - remove from frequency-map and map
+   3. In case of a tie - where two nodes are having same frequency - we will remove the LRU one , can check the  LRUCache class to see how we are maintaining nodes for getting LRU
 
      */
-    class LFUCache {
+    public class LFUCache {
+        class Node {
+            int key, val, frequency;
+            Node prev, next;
+            Node(int key, int val) {
+                this.key = key;
+                this.val = val;
+                frequency = 1;
+            }
+        }
 
+        class DoubleLinkedList {
+            //Dummy nodes to keep track of MRU and LRU
+            Node mostRecentlyUsed, leastRecentlyUsed;
+            int size;
+            DoubleLinkedList() {
+                mostRecentlyUsed = new Node(0, 0);
+                leastRecentlyUsed = new Node(0, 0);
+                mostRecentlyUsed.next = leastRecentlyUsed;
+                leastRecentlyUsed.prev = mostRecentlyUsed;
+            }
+            //Add to next of MRU
+            void add(Node node) {
+                mostRecentlyUsed.next.prev = node;
+                node.next = mostRecentlyUsed.next;
+                node.prev = mostRecentlyUsed;
+                mostRecentlyUsed.next = node;
+                size += 1;
+            }
+            //Removes node
+            void remove(Node node) {
+                node.prev.next = node.next;
+                node.next.prev = node.prev;
+                size -= 1;
+            }
+            //Removes LRU in case of a cache overflow
+            Node removeLRU() {
+                if (size > 0) {
+                    Node node = leastRecentlyUsed.prev;
+                    remove(node);
+                    return node;
+                }
+                else return null;
+            }
+        }
+
+        int capacity, size, leastFrequency;
+        //To check if node exists in cache
+        Map<Integer, Node> nodeMap;
+        //Stores frequency of nodes as a linkedList - as LRU cache format
+        Map<Integer, DoubleLinkedList> frequencyMap;
         public LFUCache(int capacity) {
-
+            this.capacity = capacity;
+            nodeMap = new HashMap<>();
+            frequencyMap = new HashMap<>();
         }
 
         public int get(int key) {
+            //Get node from nodeMap - if absent return -1
+            Node node = nodeMap.get(key);
+            if (node == null) return -1;
 
+            //Node is present - update frequencyMap
+            updateFrequencyMap(node);
+            //return value
+            return node.val;
         }
 
         public void put(int key, int value) {
+            //Edge case when capacity is zero
+            if (capacity == 0) return;
+            Node node;
+            //If node exists in cache - update value - update frequencyMap
+            if (nodeMap.containsKey(key)) {
+                node = nodeMap.get(key);
+                node.val = value;
+                updateFrequencyMap(node);
+            }
+            //Create node - add it to cache - add it to frequencyCache
+            //If size exceeds capacity - remove LFU + LRU element - update leastFrequency if changed - update size
+            else {
+                //Create new node - add to cache - increment size
+                node = new Node(key, value);
+                nodeMap.put(key, node);
+                size += 1;
 
+                //Size overflow - remove LFU + LRU element - reduce size
+                if (size > capacity) {
+                    DoubleLinkedList currentList = frequencyMap.get(leastFrequency);
+                    //Remove from frequencyMap as well as cache
+                    nodeMap.remove(currentList.removeLRU().key);
+                    size -= 1;
+                }
+
+                //New element inserted - its frequency will be 1
+                leastFrequency = 1;
+                //Add to frequencyMap - we are creating an LRU list if it's not already present - adding to LRU list and then adding this LRU list to frequencyMap
+                DoubleLinkedList newList = frequencyMap.getOrDefault(node.frequency, new DoubleLinkedList());
+                newList.add(node);
+                frequencyMap.put(node.frequency, newList);
+            }
+        }
+
+        private void updateFrequencyMap(Node node) {
+            //Frequency will be updated - remove from old frequencyMap key
+            DoubleLinkedList oldList = frequencyMap.get(node.frequency);
+            oldList.remove(node);
+
+            //Is this node last node from leastFrequency key in frequencyMap ?
+            //Update leastFrequency - Why leastFrequency += 1 ? Because current node frequency has increased by 1, and its guaranteed that we will have a node at (leastFrequency + 1) position
+            if (node.frequency == leastFrequency && oldList.size == 0) leastFrequency += 1;
+
+            //Add to frequencyMap - we are creating an LRU list if it's not already present - adding to LRU list and then adding this LRU list to frequencyMap
+            node.frequency += 1;
+            DoubleLinkedList newList = frequencyMap.getOrDefault(node.frequency, new DoubleLinkedList());
+            newList.add(node);
+            frequencyMap.put(node.frequency, newList);
         }
     }
 
