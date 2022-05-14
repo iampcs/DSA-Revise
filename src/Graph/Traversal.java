@@ -1,18 +1,34 @@
 package Graph;
 
 import java.util.*;
+/* Why is complexity of BFS and DFS - O(V + E) and not O(VE) ?
+   Let's take an example of DFS - In DFS, you traverse each node exactly once. Therefore, the time complexity of DFS is at least O(V).
+   Now, any additional complexity comes from how you discover all the outgoing paths or edges for each node which, in turn, is dependent on the way your graph is implemented.
+   If an edge leads you to a node that has already been traversed, you skip it and check the next.
+   Typical DFS implementations use a hash table to maintain the list of traversed nodes so that you could find out if a node has been encountered before in O(1) time (constant time).
 
+   * If your graph is implemented as an adjacency matrix (a V x V array), then, for each node, you have to traverse an entire row of length V in the matrix to discover all
+     its outgoing edges. Please note that each row in an adjacency matrix corresponds to a node in the graph, and the said row stores information about edges stemming
+     from the node. So, the complexity of DFS is O(V * V) = O(V^2).
+   * If your graph is implemented using adjacency lists, wherein each node maintains a list of all its adjacent edges, then, for each node, you could discover all its
+     neighbors by traversing its adjacency list just once in linear time. For a directed graph, the sum of the sizes of the adjacency lists of all the nodes is E (total number of edges).
+     So, the complexity of DFS is O(V) + O(E) = O(V + E).
+     For an undirected graph, each edge will appear twice. Once in the adjacency list of either end of the edge. So, the overall complexity will be O(V) + O (2E) ~ O(V + E).
+   * There are different other ways to implement a graph. You can reason the complexity accordingly.
+
+ */
 public class Traversal {
     public static void main(String[] args) {
 
     }
-    /* Depth First Search - Similar to DFS for trees, but we have to maintain a visited array to track nodes already visited - this is because
-   we can have cycles in graph.
+    /* Depth First Search - O(V + E)
+   Similar to DFS for trees, but we have to maintain a visited array to track nodes already visited - this is because we can have cycles in graph.
    https://practice.geeksforgeeks.org/problems/depth-first-traversal-for-a-graph/1/
    Given a connected undirected graph. Perform a Depth First Traversal of the graph.
    When we get an adjList - we assume its indexes to be our vertices name and start with 0.
    adjList.get(0).get(0) - will represent - get me zeroth vertex's first neighbour - now in case of weighted edges, there will be pair here <n,w>
    where n can represent the neighbour vertex and w, weight of edge between them.
+   Eg. Input : [[1,2,4],[0],[0],[4],[0,3]]  Output : [0,1,2,4,3]
 
    Also, it is assumed here that the graph is connected. Else we can change the code to run dfsOfGraph for all vertices.
  */
@@ -44,6 +60,7 @@ public class Traversal {
     /* Breadth First Search - Similar to DFS, we will maintain a visited array.
     https://practice.geeksforgeeks.org/problems/bfs-traversal-of-graph/1/
     Given a directed graph. The task is to do Breadth First Traversal of this graph starting from 0. Assume that graph is connected.
+    Similar to BFS of tree - We will maintain a queue which will contain all element at current level(distance from start vertex)
      */
 
     public ArrayList<Integer> bfsOfGraph(int totalVertex, ArrayList<ArrayList<Integer>> adjList) {
@@ -90,7 +107,7 @@ public class Traversal {
     public boolean validPath(int n, ArrayList<ArrayList<Integer>> adjList, int source, int destination, boolean[] visited){
         //We have reached destination
         if(source == destination) return true;
-        //Mark this node as visited so we don't visit this again
+        //Mark this node as visited, so we don't visit this again
         visited[source] = true;
         //For all neighbours of current node
         for(int neighbourIndex = 0; neighbourIndex < adjList.get(source).size() ; neighbourIndex++){
@@ -110,6 +127,10 @@ public class Traversal {
     /* All Paths From Source to Target - Given a directed acyclic graph (DAG) of n nodes labeled from 0 to n - 1, find all possible paths from node 0 to node n - 1 and return them in any order.
        The graph is given as follows: graph[i] is a list of all nodes you can visit from node i
        https://leetcode.com/problems/all-paths-from-source-to-target/
+       Eg. Input: graph = [[1,2],[3],[3],[]]
+           Output: [[0,1,3],[0,2,3]]
+           Explanation: There are two paths: 0 -> 1 -> 3 and 0 -> 2 -> 3.
+
        Similar to previous problem - just that instead of returning true and stopping when we reach destination, we will store current path instead
        Even though its mentioned here that graph is acyclic - we will solve it as a cyclic graph - to have a generic code
      */

@@ -3,8 +3,8 @@ package Graph;
 import java.util.*;
 
 /*
-SSSP - Single Source Shortest Path - Shortest path from give source to all vertices
-APSP - All Pairs Shortest Path - Shortest paths between all pairs of vertices.
+SSSP - Single Source Shortest Path - The Shortest path from give source to all vertices
+APSP - All Pairs Shortest Path - The Shortest paths between all pairs of vertices.
 
 All these algorithms apply for directed as well as undirected graphs.
 
@@ -19,9 +19,8 @@ public class ShortestPath {
 
     }
 
-    /*
-        SSSP in undirected unweighted graph using BFS - We will be using distance array to store distance from source as well as if node is visited
-     */
+    /* SSSP in undirected unweighted(Can also be interpreted as weight of 1 per edge) graph using BFS
+    We will be using distance array to store distance from source as well as if node is visited */
     private int[] shortestPath(ArrayList<ArrayList<Integer>> adjList, int N, int src)
     {
         int[] distanceArray = new int[N];
@@ -55,8 +54,8 @@ public class ShortestPath {
         Given a weighted directed graph with non-negative edge weights and a source vertex, return the shortest path cost from the source vertex to every other reachable vertex in the graph.
         https://techiedelight.com/practice/?problem=SingleSourceShortestPaths
         Input: Graph [edges = [(0, 1, 10), (0, 4, 3), (1, 2, 2), (1, 4, 4), (2, 3, 9), (3, 2, 7), (4, 1, 1), (4, 2, 8), (4, 3, 2)], vertices = 5],
-        source = 1
-        Output: {[1, 2, 2], [1, 3, 6], [1, 4, 4]}
+        source = 1        Output: {[1, 2, 2], [1, 3, 6], [1, 4, 4]}
+        source = 0        Output: {[0, 1, 4], [0, 2, 6], [0, 3, 5], [0, 4, 3]}
 
         Assumption - Graph is connected.
 
@@ -79,6 +78,7 @@ public class ShortestPath {
             if(visited[currentNode.currentNode] == false){
                 //We have reached an unvisited node - add this to paths - we are skipping source to source case
                 if(currentNode.currentNode != source)
+                    //Add [source, destination, weight of path]
                     paths.add(List.of(source,currentNode.currentNode,currentNode.weightToReachNode));
                 //Mark this node as visited
                 visited[currentNode.currentNode] = true;

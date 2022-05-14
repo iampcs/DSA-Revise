@@ -17,7 +17,10 @@ public class ConnectedComponents {
 
     /* Connected Components in an undirected graph - Given a graph with V vertices. Find the number of Provinces.
        Note: A province is a group of directly or indirectly connected cities and no other cities outside the group.
+       Your task is to complete the function numProvinces() which takes an integer V and an adjacency matrix adj as input and returns the number of provinces.
+       adj[i][j] = 1, if nodes i and j are connected and adj[i][j] = 0, if not connected.
        https://practice.geeksforgeeks.org/problems/number-of-provinces/1/
+
        Although here number of provinces are asked, we are also storing all connected components too - solution to question asking connected component
        Idea is to perform BFS on all vertices, if not visited. Now suppose 0-1 are connected and 2-3 are connected. We perform BFS on 0, we get edge (0,1). We won't perform BFS on 1, as its already visited.
        There is no way we can reach 2,3 from 0. Our BFS queue will be empty now, we know one connected component is over. Again BFS will start from vertex 2, add (2-3) to connected component
@@ -44,6 +47,7 @@ public class ConnectedComponents {
                 //This is start of a new connected component
                 ArrayList<Integer> currentComponent = new ArrayList<>();
                 currentComponent.add(vertex);
+
                 Queue<Integer> queue = new LinkedList<>();
                 queue.add(vertex);
                 while (!queue.isEmpty()){
@@ -51,7 +55,7 @@ public class ConnectedComponents {
                     //Add all neighbours to queue
                     for(int neighbour = 0; neighbour < vertices; neighbour++){
                         //Except when neighbour is current node itself and there is an edge between current node-neighbour and neighbour is not visited already
-                        if(neighbour != currentNode && adjMatrix.get(currentNode).get(neighbour)!= 0 && visited[neighbour] == false){
+                        if(neighbour != currentNode && adjMatrix.get(currentNode).get(neighbour) == 1 && visited[neighbour] == false){
                             //Add neighbour to queue, mark it as visited and add it to current connected component
                             queue.add(neighbour);
                             visited[neighbour] = true;
@@ -69,7 +73,7 @@ public class ConnectedComponents {
        An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.
        https://leetcode.com/problems/number-of-islands/
 
-       This problem can be seen as an application od connected component, if each element in matrix is considered a vertex and is connected by
+       This problem can be seen as an application of connected component, if each element in matrix is considered a vertex and is connected by
        edges in all four direction. We can run BFS/DFS on each vertex to calculate number of islands.
      */
     public static int numIslands(char[][] grid) {
@@ -82,16 +86,16 @@ public class ConnectedComponents {
             for(int col =0; col < colLen; col++){
                 //Only if we are on land and not visited this land before
                 if(grid[row][col] == 1 && visited[row][col] == false){
-                    //We are done marking all connected land
+                    //Mark all connected land as visited
                     numIslands(grid,row,col,visited);
-                    //We have found a land
+                    //We have found an island - so increment number of islands
                     numberOfIslands += 1;
                 }
             }
         }
         return numberOfIslands;
     }
-
+    //DFS to mark all land connected to given (row,col) land as visited
     private static void numIslands(char[][] grid, int row, int col, boolean[][] visited) {
 
         // It's easier to code base conditions - instead of stopping a recursive call - make all possible calls and return it based on base condition
