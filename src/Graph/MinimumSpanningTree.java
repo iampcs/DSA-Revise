@@ -91,5 +91,34 @@ public class MinimumSpanningTree {
 
         return spanningTree(n,graph);
     }
+
+    /* Min Cost to Connect All Points - You are given an array points representing integer coordinates of some points on a 2D-plane, where points[i] = [xi, yi].
+       The cost of connecting two points [xi, yi] and [xj, yj] is the manhattan distance between them: |xi - xj| + |yi - yj|, where |val| denotes the absolute value of val.
+       Return the minimum cost to make all points connected.
+       https://leetcode.com/problems/min-cost-to-connect-all-points/
+
+       Note : Here all points are vertices - and there is an edge between all of them - this is a fully connected graph. It makes more sense to perform Prim's for adjacency matrix here
+       as V^2 will be less than number of 2*Edges.
+       TODO: Implement Prim's algorithm for adjacency matrix.
+
+     */
+    public int minCostConnectPoints(int[][] points) {
+        ArrayList<ArrayList<ArrayList<Integer>>> graph = new ArrayList<>();
+        int V = points.length;
+        for (int v = 0 ; v < V; v++) graph.add(new ArrayList<>());
+
+        //Convert input to a format accepted by problem - spanningTree : We are assuming each point to be vertex num = it's index in input and weight between them as manhattanDistance
+        for(int i = 0 ; i< V; i++){
+            for(int j = 0; j<V;j++){
+                if(i == j ) continue;
+                graph.get(i).add(new ArrayList<>(Arrays.asList(j, manhattanDistance(points[i], points[j]))));
+            }
+        }
+        return spanningTree(V,graph);
+    }
+
+    private int manhattanDistance(int[] point1, int[] point2) {
+        return Math.abs(point1[0] - point2[0]) + Math.abs(point1[1] - point2[1]);
+    }
 }
 
