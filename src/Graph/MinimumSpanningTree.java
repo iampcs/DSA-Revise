@@ -1,9 +1,6 @@
 package Graph;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.PriorityQueue;
+import java.util.*;
 
 /* Spanning Tree - For a connected and undirected graph, a spanning tree of that graph is a subgraph that is a tree and connects all the vertices together. A single graph can have many spanning trees.
    A minimum spanning tree (MST) for a "weighted, connected and undirected graph" is a spanning tree with weight less than or equal to the weight of every other spanning tree.
@@ -27,12 +24,12 @@ public class MinimumSpanningTree {
        Explanation: 0-1, 0-2
 
        We will solve this using Prim's Algorithm - It is a greedy algorithm - Algorithm
-       1. Maintain a minHeap of Edges and a visited array to keep track of already visited nodes
+       1. Maintain a minHeap of Edges and a visited set to keep track of already visited nodes
        2. Add any node as first node from where we will start exploring - As this is first node - We could create an imaginary edge to this node and add it to minHeap
        3. Until minHeap is not empty - we have edges
           3.1 Pop an edge - This edge will contain a source(already visited - that's why this edge is in minHeap), a destination and weight of edge
           3.2 Have we already visited this destination ? Skip this edge if we did
-          3.3 Add destination to visited Array
+          3.3 Add destination to visited set
           3.4 Add all edges from this destination to minHeap
           3.5 We are using this edge for our MST - add to result
       4. Return result
@@ -40,18 +37,18 @@ public class MinimumSpanningTree {
      */
     static int spanningTree(int V, ArrayList<ArrayList<ArrayList<Integer>>> adjList)
     {
-        boolean[] visited = new boolean[V];
+        Set<Integer> visited = new HashSet<>();
         PriorityQueue<Edge> minHeap = new PriorityQueue<>(Comparator.comparingInt(a -> a.weight));
         int mstWeight = 0;
-        //Lets start with vertex 0 - add imaginary edge to 0
+        //Let's start with vertex 0 - add imaginary edge to 0
         minHeap.add(new Edge(-1,0,0));
 
         while (!minHeap.isEmpty()){
             Edge currentEdge = minHeap.poll();
             //We have already visited this vertex - skip
-            if(visited[currentEdge.destination]) continue;
+            if(visited.contains(currentEdge.destination)) continue;
 
-            visited[currentEdge.destination] = true;
+            visited.add(currentEdge.destination);
             //Add all outgoing edges from edge destination
             for(ArrayList<Integer> edge : adjList.get(currentEdge.destination)){
                 minHeap.add(new Edge(currentEdge.destination, edge.get(0),edge.get(1)));
@@ -59,8 +56,8 @@ public class MinimumSpanningTree {
             //This condition to skip the imaginary edge we added - We could have added all edges from 0 to minHeap and start too - but this is more neat
             if(currentEdge.source != -1) mstWeight += currentEdge.weight;
         }
-
-        return mstWeight;
+        //In case of a disconnected graph we won't be able to visit all the vertices - return -1 in that case.
+        return visited.size() == V ? mstWeight : -1;
     }
 
     static class Edge {
@@ -73,6 +70,26 @@ public class MinimumSpanningTree {
             this.destination = destination;
             this.weight = weight;
         }
+    }
+
+    /* Connecting Cities With Minimum Cost - There are ‘N’ cities numbered from 1 to ‘N’ and ‘M’ roads. Each road connects two different cities and described as a two-way road using three integers (‘U’, ‘V’, ‘W’) which represents the cost ‘W’ to connect city ‘U’ and city ‘V’ together.
+       Now, you are supposed to find the minimum cost so that for every pair of cities, there exists a path of connections (possibly of length 1) that connects those two cities together. The cost is the sum of the connection costs used. If the task is impossible, return -1.
+       https://www.codingninjas.com/codestudio/problems/connecting-cities-with-minimum-cost_1386586
+
+       This is a use case of MST - will convert the input to a format of problem - spanningTree.
+       Note: For problem where we are provided all edges - Kruskal's too can be used - specially if edges are already sorted by weight.
+     */
+    public static int getMinimumCost(int n, int m, int[][] connections) {
+
+        ArrayList<ArrayList<ArrayList<Integer>>> graph = new ArrayList<>();
+        for (int v = 0 ; v < n; v++) graph.add(new ArrayList<>());
+        for(int[] edge : connections){
+            //Vertices are named 1-N, we're maintaining indices 0 to N-1, so deduct 1 from input
+            graph.get(edge[0] - 1).add(new ArrayList<>(Arrays.asList(edge[1] - 1, edge[2])));
+            graph.get(edge[1] - 1).add(new ArrayList<>(Arrays.asList(edge[0] - 1, edge[2])));
+        }
+
+        return spanningTree(n,graph);
     }
 }
 
