@@ -37,6 +37,8 @@ import java.util.*;
     isCycle(int src, int dest){
         return find(src) == find(dest);
     }
+ Note: We can also find our number of sets at present in a disjoint set - We can maintain a numOfSets - and initialize it with V. When ever we are performing an union and
+ we are merging two sets with diff parent - we will reduce numOfSets.
  */
 public class DisjointSets {
     public static void main(String[] args) {
@@ -49,6 +51,7 @@ public class DisjointSets {
         int vertices;
         int[] parents;
         int[] ranks;
+        int numOfSets;
 
         UnionFind(int vertices) {
             this.vertices = vertices;
@@ -58,6 +61,7 @@ public class DisjointSets {
                 parents[pos] = pos;
             //By default, all ranks are 0 only
             ranks = new int[vertices];
+            numOfSets = vertices;
         }
 
         //Worst case complexity - O(N) in case hierarchy is linear
@@ -76,6 +80,8 @@ public class DisjointSets {
             int vParent = find(v);
             //Find parent of x
             int xParent = find(x);
+
+            if(xParent != vParent) numOfSets -= 1;
 
             //Make parent of v's parent to that of x's parent - hence merging v subgroup to x.
             parents[vParent] = xParent;
@@ -96,7 +102,7 @@ public class DisjointSets {
         void unionByRank(int v, int x) {
             int vParent = findWithPathCompression(v);
             int xParent = findWithPathCompression(x);
-
+            if(xParent != vParent) numOfSets -= 1;
             // Rank of x's parent is smaller than that of v's parent - merge x's subset to v's
             if (ranks[xParent] < ranks[vParent]) parents[xParent] = vParent;
                 // Rank of v's parent is smaller than that of v's parent - merge v's subset to x's
@@ -178,6 +184,44 @@ public class DisjointSets {
         }
 
         return res;
+    }
+
+    /* Graph Valid Tree - Given n nodes labeled from 0 to n - 1 and a list of undirected edges (each edge is a pair of nodes), write a function to check whether these edges make up a valid tree.
+       https://www.lintcode.com/problem/178/
+
+       Simple application of union tree and spanning tree concept - for a spanning tree number of edges - V - 1
+       Even if a graph has V-1 edges - it can have a cycle with disconnected nodes - we check this using union-find
+     */
+    public boolean validTree(int n, int[][] edges) {
+        if(edges.length != n - 1) return false;
+        UnionFind uf = new UnionFind(n);
+
+        for(int[] edge : edges){
+            if(uf.isCycle(edge[0],edge[1])) return false;
+            uf.unionByRank(edge[0],edge[1]);
+        }
+
+        return true;
+    }
+
+    /* Number of Operations to Make Network Connected - There are n computers numbered from 0 to n - 1 connected by ethernet cables connections forming a network where connections[i] = [ai, bi] represents a connection between computers ai and bi.
+      Any computer can reach any other computer directly or indirectly through the network. You are given an initial computer network connections.
+      You can extract certain cables between two directly connected computers, and place them between any pair of disconnected computers to make them directly connected.
+      Return the minimum number of times you need to do this in order to make all the computers connected. If it is not possible, return -1.
+      https://leetcode.com/problems/number-of-operations-to-make-network-connected/
+
+       Similar to above problem - To connect n nodes - we need n-1 edges, We just have to check if we have minimum number of edges to join all nodes(spanning tree) - if we do
+       edge we need to move - number of subsets - 1
+     */
+    public int makeConnected(int n, int[][] connections) {
+        if(connections.length < n-1) return -1;
+        UnionFind uf = new UnionFind(n);
+
+        for(int[] edge : connections){
+            uf.unionByRank(edge[0],edge[1]);
+        }
+
+        return uf.numOfSets - 1;
     }
 
 }

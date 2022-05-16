@@ -1,19 +1,17 @@
 package Graph;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 
+/* Many problems can be formed where we will be asked number of connected components, their size, elements in connected components
+   other operations regarding connected components like finding number of ways we can form a pair of elements each belonging to diff group(connected component).
+   While connected component can be found using BFS/DFS for undirected graphs - If BFS or DFS visits all vertices, then the given undirected graph is connected.
+   For directed graphs this approach won't work. Eg. A -> B -> C vertices, a BFS/DFS will show this as strongly connected, but there is no
+   way to reach to A from any other node.So we can use Tarjan's or Kosaraju's algorithm for this.
+*/
 public class ConnectedComponents {
     public static void main(String[] args) {
 
     }
-    /* Many problems can be formed where we will be asked number of connected components, their size, elements in connected components
-       other operations regarding connected components like finding number of ways we can form a pair of elements each belonging to diff group(connected component).
-       While connected component can be found using BFS/DFS for undirected graphs - If BFS or DFS visits all vertices, then the given undirected graph is connected.
-       For directed graphs this approach won't work. Eg. A -> B -> C vertices, a BFS/DFS will show this as strongly connected, but there is no
-       way to reach to A from any other node.So we can use Tarjan's or Kosaraju's algorithm for this.
-     */
 
     /* Connected Components in an undirected graph - Given a graph with V vertices. Find the number of Provinces.
        Note: A province is a group of directly or indirectly connected cities and no other cities outside the group.
@@ -113,4 +111,75 @@ public class ConnectedComponents {
         numIslands(grid,row,col + 1,visited);
         numIslands(grid,row,col - 1,visited);
     }
+
+    /* Kosaraju's Algorithm for strongly connected directed graph - Time complexity - O(V + E)
+       Watch to understand the logic behind Kosaraju's - https://www.youtube.com/watch?v=Rs6DXyWpWrI
+       In summary
+       1. Perform DFS - Sort nodes on decreasing end time - We use a stack to do this - O(V+E)
+       2. Transpose the graph - reverse edges             - O(V+E)
+       3. Perform DFS in order of Step 1, All the nodes we can reach from a node in list are part of its connected component - O(V+E)
+       https://practice.geeksforgeeks.org/problems/strongly-connected-components-kosarajus-algo/1/
+     */
+    public int kosaraju(int V, ArrayList<ArrayList<Integer>> adj)
+    {
+       List<List<Integer>> stronglyConnectedComponents = new ArrayList<>();
+        boolean[] visited = new boolean[V];
+        Stack<Integer> visitOrder = new Stack<>();
+        // DFS to get order of execution for 2nd DFS
+        for(int v = 0; v < V; v++){
+            if(!visited[v])
+                dfs1(v,adj,visited,visitOrder);
+        }
+
+        //Transpose of graph and re-setting  visited array
+        ArrayList<ArrayList<Integer>> revAdj = transposeGraph(V,adj);
+        Arrays.fill(visited,false);
+
+        //DF2 in order for DFS1 - Only strongly connected component will have the same DFS as first order
+        while(!visitOrder.isEmpty()){
+            int vertex = visitOrder.pop();
+            if(!visited[vertex]){
+                ArrayList<Integer> currentConnected = new ArrayList<>();
+                dfs2(vertex, revAdj, visited,currentConnected);
+                stronglyConnectedComponents.add(new ArrayList<>(currentConnected));
+            }
+        }
+
+       return stronglyConnectedComponents.size();
+    }
+
+    private void dfs2(int vertex, ArrayList<ArrayList<Integer>> revAdj, boolean[] visited, ArrayList<Integer> currentConnected) {
+        if(visited[vertex]) return;
+
+        visited[vertex] = true;
+        currentConnected.add(vertex);
+
+        for(int neighbour : revAdj.get(vertex)){
+            dfs2(neighbour,revAdj,visited,currentConnected);
+        }
+    }
+
+    private ArrayList<ArrayList<Integer>> transposeGraph(int V, ArrayList<ArrayList<Integer>> adj) {
+        ArrayList<ArrayList<Integer>> revAdj = new ArrayList<>();
+        for(int v = 0; v < V; v++) revAdj.add(new ArrayList<Integer>());
+        for(int v = 0; v < V; v++){
+            for(int neighbour : adj.get(v)){
+                revAdj.get(neighbour).add(v);
+            }
+        }
+
+        return revAdj;
+    }
+
+    private void dfs1(int currNode, ArrayList<ArrayList<Integer>> adj, boolean[] visited, Stack<Integer> visitOrder) {
+        if(visited[currNode]) return;
+
+        visited[currNode] = true;
+        for(int neighbour : adj.get(currNode)){
+            dfs1(neighbour, adj, visited,visitOrder);
+        }
+
+        visitOrder.add(currNode);
+    }
+
 }
