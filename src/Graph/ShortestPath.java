@@ -10,7 +10,6 @@ All these algorithms apply for directed as well as undirected graphs.
 
 SSSP for unweighted graph - BFS - O(V + E)
 SSSP for weighted graph without negative cycle - Dijkstra - O(E + VLogV)
-SSSP for weighted graph with negative cycle if there exist as non-negative solution - A* (Dijkstra with heuristics)
 SSSP for weighted graph with negative cycle - Bellman-Ford - O(VE)
 APSP for weighted graph with negative cycle - Floyd-Warshall - O(V^3)
  */
@@ -103,6 +102,105 @@ public class ShortestPath {
      */
     public int networkDelayTime(int[][] times, int n, int k) {
 
+
+        return 0;
+    }
+
+    /* Word Ladder - A transformation sequence from word beginWord to word endWord using a dictionary wordList is a sequence of words beginWord -> s1 -> s2 -> ... -> sk such that:
+        Every adjacent pair of words differs by a single letter.
+        Every si for 1 <= i <= k is in wordList. Note that beginWord does not need to be in wordList.
+        sk == endWord
+        Given two words, beginWord and endWord, and a dictionary wordList, return the number of words in the shortest transformation sequence from beginWord to endWord, or 0 if no such sequence exists.
+        https://leetcode.com/problems/word-ladder/
+
+       This is basically finding the shortest length between start and end word - number of characters that differ between two words are edge length
+       as we can only move to an edge length of 1, this is similar to an unweighted graph - we can use bfs to find the length of the shortest path.
+       The trick here is to make the adjacency list from inputs. Once we have that we will perform multi-source BFS to check if we can reach from
+       source to end. We are using multi-source BFS here because we want to process all words at edge length 1 from current word. Refer traversal problems such as wall & gates, rotten oranges to understand multi-source BFS.
+     */
+    public int ladderLength(String beginWord, String endWord, List<String> wordList) {
+        //Set of all words given - this includes endWord
+        Set<String> set = new HashSet<>(wordList);
+        if(!set.contains(endWord)) return 0;
+        // BFS queue - add startWord to start
+        Queue<String> queue = new LinkedList<>();
+        queue.add(beginWord);
+        //Set of visited words
+        Set<String> visited = new HashSet<>();
+        queue.add(beginWord);
+        //Length of our shortest path - as end will be a part of path - we can initiate it with 1
+        int length = 1;
+
+        while(!queue.isEmpty()){
+            int size = queue.size();
+            //We are using multi-source BFS here because we want to process all words at edge length 1 from current word
+            for(int i = 0; i < size; i++){
+                String word = queue.poll();
+                //Have we reached end ?
+                if(word.equals(endWord)) return length;
+
+                //Find all possible length 1 words for current word
+                for(int j = 0; j < word.length(); j++){
+                    for(char k = 'a'; k <= 'z'; k++){
+                        char arr[] = word.toCharArray();
+                        arr[j] =  k;
+
+                        String str = new String(arr);
+                        //Check if it's a valid word from wordList and is not visited already
+                        if(set.contains(str) && !visited.contains(str)){
+                            //Add to bfs queue for next batch and mark it as visited
+                            queue.add(str);
+                            visited.add(str);
+                        }
+                    }
+                }
+            }
+            // length will increase after each bfs iteration
+            length += 1;
+        }
+        return 0;
+    }
+
+    /* Bellman-Ford Algorithm for Shortest Path : O(VE)- Dijkstra doesn't work for Graphs with negative weight edges, it gives an incorrect solution.
+       Bellman-Ford works for such graphs - even though it can't give you a correct solution - because it doesn't exist for a negative cycle,
+       but it can detect a negative cycle. Bellman-Ford is also simpler than Dijkstra and suites well for distributed systems. But time complexity of Bellman-Ford is O(VE)
+       https://practice.geeksforgeeks.org/problems/negative-weight-cycle3504/1
+
+       It works on a simple idea - the shortest length(not weight) of the shortest path will be (V - 1). It runs a loop V-1 times and relaxes edges
+       one by one - so with each iteration we will get closer to our shortest path - because it starts with length 1, and then keep adding to it each iteration
+       it can be seen as bottoms up approach of DP.
+       Algorithm:
+       1. Initiate distance array distance[V] with all values as infinite, set distance of source to 0, distance[source] = 0
+       2. loop - (V-1) times - By end of this we will be guaranteed to have a shortest path of length (V-1), if exists
+           For each edge (u,v)
+           if : distance[v] > distance[u] + weight(u,v)
+                distance[v] = distance[u] + weight(u,v)
+       3. Run this for loop one more time, if shortest path is changing - there is a negative cycle
+
+       Can watch this video for ref -  https://www.youtube.com/watch?v=FrLWd1tJ_Wc
+     */
+    public int isNegativeWeightCycle(int n, int[][] edges)
+    {
+        int[] distance = new int[n];
+        Arrays.fill(distance, Integer.MAX_VALUE);
+        //Making 0th vertex as source index - it could be any index
+        distance[0] = 0;
+
+        for(int count = 0; count < n - 1; count++){
+            for(int[] edge : edges){
+                //Updating distance if we found a path with less weight
+                //if : distance[v] > distance[u] + weight(u,v)
+                //     distance[v] = distance[u] + weight(u,v)
+                if(distance[edge[0]] != Integer.MAX_VALUE && distance[edge[1]] > distance[edge[0]] + edge[2])
+                    distance[edge[1]] = distance[edge[0]] + edge[2];
+            }
+        }
+        //Running this loop one more time to detect negative cycle
+        for(int[] edge : edges){
+            //We can still find a path with less weight - means there is a negative cycle
+            if(distance[edge[1]] > distance[edge[0]] + edge[2])
+                return 1;
+        }
 
         return 0;
     }

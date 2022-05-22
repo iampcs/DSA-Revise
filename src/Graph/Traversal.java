@@ -171,6 +171,264 @@ public class Traversal {
         currPath.remove(currPath.size() - 1);
 
     }
+    /* Max Area of Island - You are given an m x n binary matrix grid. An island is a group of 1's (representing land) connected 4-directionally (horizontal or vertical.)
+       You may assume all four edges of the grid are surrounded by water. The area of an island is the number of cells with a value 1 in the island.
+       Return the maximum area of an island in grid. If there is no island, return 0.
+       https://leetcode.com/problems/max-area-of-island/
+
+       Simple DFS solution with visited array. Our dfsArea will return sum of area of all its connecting tiles. We will find the max among them
+       and return.
+
+     */
+    public int maxAreaOfIsland(int[][] grid) {
+        int gridRow = grid.length;
+        int gridCol = grid[0].length;
+        boolean[][] visited = new boolean[gridRow][gridCol];
+        int maxArea = 0;
+
+        for(int row = 0; row < gridRow; row++){
+            for(int col = 0; col < gridCol; col++){
+                if(!visited[row][col]){
+                    int currArea = dfsArea(row,col, gridRow,gridCol, visited, grid);
+                    maxArea = Math.max(currArea,maxArea);
+                }
+            }
+        }
+
+        return maxArea;
+    }
+
+    private int dfsArea(int row, int col, int gridRow, int gridCol, boolean[][] visited, int[][] grid) {
+        //If we are out of board or tile is already visited or tile is water - return 0
+        //Note: In case of these checks - always check for board size before checking other conditions
+        if( row == gridRow || row < 0 || col == gridCol || col < 0 || visited[row][col] || grid[row][col] == 0) return 0;
+        visited[row][col] = true;
+
+        //Return current area + area of all surrounding tiles
+        return 1 + dfsArea(row + 1, col, gridRow, gridCol, visited, grid) +
+                          dfsArea(row - 1, col, gridRow, gridCol, visited, grid) +
+                          dfsArea(row , col + 1, gridRow, gridCol, visited, grid) +
+                          dfsArea(row, col - 1, gridRow, gridCol, visited, grid) ;
+
+    }
+
+    /* Pacific Atlantic Water Flow - https://leetcode.com/problems/pacific-atlantic-water-flow/
+       Algorithm approach - https://www.youtube.com/watch?v=s-VkcjHqkGI
+
+       We have to find coordinates from where water can flow to both ocean - instead of going to each cell and checking if water will flow O((N*M) * (N*M))
+       to both - we perform a DFS from cells we know water will flow to at-least one ocean, two sets will be created - a set of coordinates
+       that will flow to pacific and set of coordinated which flows to atlantic - 2 * O(NxM)
+       Our solution set will contain common sets from both the sets
+
+     */
+    public List<List<Integer>> pacificAtlantic(int[][] heights) {
+        List<List<Integer>> solution = new ArrayList<>();
+        int row = heights.length;
+        int col = heights[0].length;
+        //Will contain coordinates from where water can flow to pacific
+        Set<List<Integer>> pSet = new HashSet<>();
+        //Will contain coordinates from where water can flow to atlantic
+        Set<List<Integer>> aSet = new HashSet<>();
+
+        // We know all elements from first col will flow to pacific
+        // Also all elements from last column will flow to atlantic
+        //Performing DFS from these points to check till where water can flow
+        for(int rowC = 0 ; rowC < row; rowC++){
+            dfsOnGrid(rowC, 0,pSet,heights[rowC][0], row, col, heights);
+            dfsOnGrid(rowC, col - 1,aSet,heights[rowC][col - 1], row, col, heights);
+        }
+        // We know all elements from first row will flow to pacific
+        // Also all elements from last row will flow to atlantic
+        //Performing DFS from these points to check till where water can flow
+        for(int colC = 0 ; colC < col; colC++){
+            dfsOnGrid(0, colC,pSet,heights[0][colC], row, col, heights);
+            dfsOnGrid(row - 1, colC,aSet,heights[row - 1][colC], row, col, heights);
+        }
+        //Common coordinates from both the set will be our solution
+        for(List<Integer> rc : pSet){
+            if(aSet.contains(rc)) solution.add(rc);
+        }
+        return solution;
+    }
+    //Water can flow from high position to low - but we are backtracking from sea and checking where can water reach - so we will check for coordinates higher than current one
+    private void dfsOnGrid(int rowC, int colC, Set<List<Integer>> visitedSet, int prevHeight, int row, int col, int[][] heights) {
+        //We want to be inside board, coordinate should not be already visited - current coordinate should be higher than prev - else water won't flow
+        if(visitedSet.contains(List.of(rowC,colC)) || rowC < 0 || colC < 0 || rowC == row || colC == col || heights[rowC][colC] < prevHeight)
+            return;
+
+        //Mark as visited and perform dfs on all four direction
+        visitedSet.add(List.of(rowC, colC));
+        dfsOnGrid(rowC + 1,colC,visitedSet,heights[rowC][colC],row,col,heights);
+        dfsOnGrid(rowC - 1,colC,visitedSet,heights[rowC][colC],row,col,heights);
+        dfsOnGrid(rowC,colC + 1,visitedSet,heights[rowC][colC],row,col,heights);
+        dfsOnGrid(rowC,colC - 1,visitedSet,heights[rowC][colC],row,col,heights);
+    }
+
+    /* Surrounded Regions - Given an m x n matrix board containing 'X' and 'O', capture all regions that are 4-directionally surrounded by 'X'.
+       A region is captured by flipping all 'O's into 'X's in that surrounded region.
+       https://leetcode.com/problems/surrounded-regions/
+
+       Algorithm approach - https://www.youtube.com/watch?v=9z2BunfoZ5Y
+       The approach is similar to previous problem - instead of finding regions surrounded by C and flipping them - why not find regions that can't be flipped and flip the rest.
+       We know that 'O' that are near borders can't be flipped - So we perform dfs on all these 'O' and marked those regions. Anything else other than these regions could be flipped.
+
+     */
+    public void solve(char[][] board) {
+        //'Can't be flipped' set
+        Set<List<Integer>> visited = new HashSet<>();
+        int row = board.length;
+        int col = board[0].length;
+
+        //Performing dfs on borders and marking regions that can't be flipped
+        for(int rC = 0; rC < row; rC++){
+            dfsBoard(rC,0,visited,board,row,col);
+            dfsBoard(rC,col - 1,visited,board,row,col);
+        }
+        for(int cC = 0; cC < col; cC++){
+            dfsBoard(0,cC,visited,board,row,col);
+            dfsBoard(row - 1,cC,visited,board,row,col);
+        }
+
+        //Marking all other regions as 'X' that are not part of regions marked as 'can't be flipped'
+        for(int rC = 0; rC < row; rC++){
+            for(int cC = 0; cC < col; cC++){
+                if(board[rC][cC] == 'O' && !visited.contains(List.of(rC,cC)))
+                    board[rC][cC] = 'X';
+            }
+        }
+
+    }
+
+    private void dfsBoard(int rC, int cC, Set<List<Integer>> visited, char[][] board, int row, int col) {
+        //Not already a part of set or outside of board or is a 'X'
+        if(visited.contains(List.of(rC,cC)) || rC < 0 || rC == row || cC < 0 || cC == col || board[rC][cC] == 'X') return;
+
+        //We have found a cell that can't be flipped - add to set and perform dfs on all directions
+        visited.add(List.of(rC,cC));
+        dfsBoard(rC+ 1,cC,visited,board,row,col);
+        dfsBoard(rC - 1,cC,visited,board,row,col);
+        dfsBoard(rC,cC + 1,visited,board,row,col);
+        dfsBoard(rC,cC - 1,visited,board,row,col);
+    }
+
+    /* Rotting Oranges - You are given an m x n grid where each cell can have one of three values:
+    0 representing an empty cell,
+    1 representing a fresh orange, or
+    2 representing a rotten orange.
+    Every minute, any fresh orange that is 4-directionally adjacent to a rotten orange becomes rotten.
+    Return the minimum number of minutes that must elapse until no cell has a fresh orange. If this is impossible, return -1.
+
+    https://leetcode.com/problems/rotting-oranges/
+    Approach : https://www.youtube.com/watch?v=y704fEOx0s0
+
+    Every second a rotten orange will make a fresh orange rotten. We will use multi-source bfs here. This is a technique where we will perform bfs on multiple nodes at once.
+    We will find out the count of fresh oranges - and add all rotten oranges to our bfs queue.
+    Then will perform bfs on all those rotten oranges.
+        Reduce count of fresh orange if any nearby
+        Add all oranges nearby to queue now
+        Increment time
+    Because we will be visiting each grid only once - time complexity - O(mn)
+     */
+    public int orangesRotting(int[][] grid) {
+        int time = 0;
+        int fresh = 0;
+        int row = grid.length;
+        int col = grid[0].length;
+        Queue<List<Integer>> queue = new LinkedList<>();
+
+        //Count fresh orange and add rotten oranges at t = 0, to queue
+        for(int r = 0; r < row ; r++){
+            for(int c = 0 ; c< col ; c++){
+                if(grid[r][c] == 1) fresh += 1;
+                else if(grid[r][c] == 2) queue.add(List.of(r,c));
+            }
+        }
+
+        while (!queue.isEmpty() && fresh != 0){
+            //Run BFS on all oranges at time = t
+            int qSize = queue.size();
+            for(int rotten = 0; rotten < qSize; rotten++){
+                List<Integer> currOrange = queue.poll();
+                int currRow = currOrange.get(0);
+                int currCol = currOrange.get(1);
+
+                //BFS on all four direction - If fresh orange detected - rot it - add it to queue for next batch processing
+                if(currRow + 1 < row && grid[currRow + 1][currCol] == 1){
+                    grid[currRow + 1][currCol] = 2;
+                    queue.add(List.of(currRow + 1, currCol));
+                    fresh -= 1;
+                }
+                if(currRow - 1 >= 0 && grid[currRow - 1][currCol] == 1){
+                    grid[currRow - 1][currCol] = 2;
+                    queue.add(List.of(currRow - 1, currCol));
+                    fresh -= 1;
+                }
+                if(currCol + 1 < col && grid[currRow][currCol + 1] == 1){
+                    grid[currRow][currCol + 1] = 2;
+                    queue.add(List.of(currRow, currCol + 1));
+                    fresh -= 1;
+                }
+                if(currCol - 1 >= 0 && grid[currRow][currCol - 1] == 1){
+                    grid[currRow][currCol - 1] = 2;
+                    queue.add(List.of(currRow, currCol - 1));
+                    fresh -= 1;
+                }
+            }
+            //All oranges at time = t are polled - increment time for next batch
+            time += 1;
+        }
+        //If all fresh will rot we return time else -1
+        return fresh == 0 ? time : -1;
+    }
+
+    /* Walls and Gates - You are given a m x n 2D grid initialized with these three possible values.
+    -1 - A wall or an obstacle.
+    0 - A gate.
+    INF - Infinity means an empty room. We use the value 2^31 - 1 = 2147483647 to represent INF as you may assume that the distance to a gate is less than 2147483647.
+    Fill each empty room with the distance to its nearest gate. If it is impossible to reach a Gate, that room should remain filled with INF
+    https://www.lintcode.com/problem/663/
+
+    Approach 1 : Perform DFS on each room to find the closest gate - max rooms - mn, dfs - mn - O((mn) * (mn))
+    Approach 2: Just like precious problem, we can do a multi-source bfs. We will add all the gates to a queue - perform bfs on all four directions - Will update a room
+    only if its reachable faster from current gate - this way we will visit a cell max once - O(mn)
+     */
+    public void wallsAndGates(int[][] rooms) {
+        int row = rooms.length;
+        int col = rooms[0].length;
+        Queue<List<Integer>> queue = new LinkedList<>();
+        int length = 1;
+        //All directions for a shorter code
+        int[][] directions = new int[][]{{1,0},{-1,0},{0,1},{0,-1}};
+
+        //Adding all gates to queue
+        for(int r = 0; r < row; r++){
+            for(int c = 0; c < col ; c++){
+                if(rooms[r][c] == 0) queue.add(List.of(r,c));
+            }
+        }
+
+        while (!queue.isEmpty()){
+            int qSize = queue.size();
+            //For all gates
+            for(int q = 0; q < qSize; q++){
+                List<Integer> currQueue = queue.poll();
+                //Perform bfs on all four directions
+                for(int[] direction : directions){
+                    int currRow = currQueue.get(0) + direction[0];
+                    int currCol = currQueue.get(1) + direction[1];
+                    //Skip this cell if - its outside board, it's an obstacle or somebody(other gate) has already populated a value - means it's closer to that gate
+                    if(currRow < 0 || currRow == row || currCol < 0 || currCol  == col || rooms[currRow][currCol] == -1 || rooms[currRow][currCol] < length) continue;
+                    //Room is closer to current gate - update length & add to queue for performing bfs for next batch
+                    rooms[currRow][currCol] = length;
+                    queue.add(List.of(currRow,currCol));
+                }
+            }
+            //For next bfs iteration length will be increased by 1
+            length += 1;
+        }
+    }
+
+
 
 }
 
