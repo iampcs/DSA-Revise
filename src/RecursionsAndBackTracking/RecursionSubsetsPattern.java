@@ -2,6 +2,7 @@ package RecursionsAndBackTracking;
 
 import java.lang.invoke.SwitchPoint;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /*
 How to identify this pattern ?
@@ -59,9 +60,6 @@ public class RecursionSubsetsPattern {
 
     }
 
-
-
-
     /* Subsets -  Given an integer array nums of unique elements, return all possible subsets (the power set).
     https://leetcode.com/problems/subsets/
     */
@@ -79,19 +77,95 @@ public class RecursionSubsetsPattern {
             return;
         }
         /* Decision tree, we will be making two choices here - Add this unprocessed element to our solution or skip it */
-        /* Skipping current unprocessed element*/
-        ArrayList<Integer> listWithAdding = new ArrayList<>(singleSubset);
-
         /*Adding current unprocessed element to solution */
+        ArrayList<Integer> listWithAdding = new ArrayList<>(singleSubset);
         listWithAdding.add(numbers[position]);
+
+        /* Skipping current unprocessed element*/
         ArrayList<Integer> listWithoutAdding = new ArrayList<>(singleSubset);
 
         /* Recurse on both the branches created - with adding and without adding current element*/
         subsets(numbers, position + 1,listWithAdding, solution);
         subsets(numbers,position+1,listWithoutAdding,solution);
     }
+    /* Given a set of distinct integers, S, return all possible subsets. - The subsets should be sorted in ascending ( lexicographic ) order.
+       https://www.interviewbit.com/problems/subset/
+
+       The only difference here is to print it lexicographically - How can we do it? The idea is to sort it first.
+       Then start fixing one element from this sorted order - and run the recursive function on rest
+       When we are done with printing all possible subsets with the fixed element - remove it - so we can fix the
+       next element and recurse for elements after that.
+     */
+    public ArrayList<ArrayList<Integer>> subsets(ArrayList<Integer> A) {
+        ArrayList<ArrayList<Integer>> solution = new ArrayList<>();
+        Collections.sort(A);
+        //We are starting with -1, to add empty subset too
+        subsets(A,-1, new ArrayList<>(),solution);
+
+        return solution;
+
+    }
+    void subsets(ArrayList<Integer> A, int pos, ArrayList<Integer> currSol, ArrayList<ArrayList<Integer>> solution){
+        //We have processed all elements - return
+        if(pos == A.size())  return;
+        //This is different here - as we want to add subsets as soon as they are available - to main order
+        solution.add(new ArrayList<>(currSol));
+        //For all numbers in A
+        for(int cPos = pos + 1; cPos < A.size(); cPos++){
+            //Fix current element
+            currSol.add(A.get(cPos));
+            //Recurse for rest of elements
+            subsets(A,cPos,currSol,solution);
+            //Remove current element - so in next iteration we can fix another element
+            currSol.remove(currSol.size() - 1);
+        }
+    }
+
+    /* Combination Sum - Given an array of candidate numbers A and a target number B, find all unique combinations in A where the candidate numbers sums to B.
+       The same repeated number may be chosen from A unlimited number of times.
+       Constraints :
+            Elements in a combination (a1, a2, … , ak) must be in non-descending order. (ie, a1 ≤ a2 ≤ … ≤ ak).
+            The combinations themselves must be sorted in ascending order.
+            The solution set must not contain duplicate combinations.
+      https://www.interviewbit.com/problems/combination-sum/
+
+      This problem is similar to previous problem - we will sort the input array and remove duplicates. Only change from previous problem is we can use the same
+      element again and again - so we won't move to next element until our function call is valid (sum is less than 0 or no more elements left).
+      Once we have all the possible solution with first position number - we will remove it and start with second position.
+     */
+    public ArrayList<ArrayList<Integer>> combinationSum(ArrayList<Integer> A, int B) {
+        ArrayList<ArrayList<Integer>> solution = new ArrayList<>();
+        //Sort and remove duplicates
+        List<Integer> newA = A.stream().distinct().sorted().collect(Collectors.toList());
+        //Start recursive call from position 0
+        combinationSum(newA,0,B, new ArrayList<>(), solution);
+
+        return solution;
+    }
+
+    private void combinationSum(List<Integer> A, int pos, int currSum, ArrayList<Integer> seq, ArrayList<ArrayList<Integer>> solution) {
+        //Can't get a solution from here - return
+        if(pos == A.size() || currSum < 0) return;
+        //We got our solution - as all numbers are positive - we can't get a solution going forward - return
+        //How can we solve this for negative numbers too ?
+        if(currSum == 0){
+            solution.add(new ArrayList<>(seq));
+            return;
+        }
+        //For all number in A
+        for(int cPos = pos; cPos < A.size(); cPos++){
+            //Add cPos to current solution - Fix A[cPos]
+            seq.add(A.get(cPos));
+            //Recurse for same condition with updated target sum
+            combinationSum(A,cPos, currSum - A.get(cPos),seq, solution);
+            //We must have got all possible solutions starting from A[cPos] from prev recursive call
+            //Remove A[cPos] from combination, so we can fix cPos + 1 as first element at current depth
+            seq.remove(seq.size() - 1);
+        }
+    }
 
     /*  Letter Case Permutation - Given a string s, you can transform every letter individually to be lowercase or uppercase to create another string.
+    Ex. Input: s = "a1b2"  Output: ["a1b2","a1B2","A1b2","A1B2"]
     https://leetcode.com/problems/letter-case-permutation/submissions
     This problem is similar to subset problem, only difference here is we branch here conditionally*/
     public List<String> letterCasePermutation(String s) {
@@ -105,7 +179,7 @@ public class RecursionSubsetsPattern {
     private void letterCasePermutation(String s, int position, String output, List<String> solution) {
         /* All elements are processed - We are at a leaf - Add current output to solution */
         if(position == s.length()){
-            solution.add(output.toString());
+            solution.add(output);
             return;
         }
 
@@ -124,9 +198,11 @@ public class RecursionSubsetsPattern {
     }
 
     /*  Permutations - Given an array nums of distinct integers, return all the possible permutations.
+        Ex. Input: nums = [1,2,3]
+            Output: [[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]
         https://leetcode.com/problems/permutations/
         This problem is different in sense we are not excluding any elements from our solution, here we will be making decision on position
-         of element in our solution rather than element itself*/
+        of element in our solution rather than element itself*/
     public List<List<Integer>> permute(int[] nums) {
         /* All elements are unique, solutions will be unique, else we would have used a set here */
         List<List<Integer>> solution = new ArrayList<>();
@@ -157,12 +233,15 @@ public class RecursionSubsetsPattern {
             permute(input,position+1, new ArrayList<>(output),solution);
 
             /*Backtrack*/
+            /*Removing from output to again place it to a new position in next iteration*/
             output.remove(rCall);
         }
     }
 
     /*  Letter Combinations of a Phone Number - Given a string containing digits from 2-9 inclusive,
         return all possible letter combinations that the number could represent. A mapping of digit to letters - imagine old Nokia Mobile
+        Ex. Input: digits = "23"
+            Output: ["ad","ae","af","bd","be","bf","cd","ce","cf"]
         https://leetcode.com/problems/letter-combinations-of-a-phone-number/ */
     public List<String> letterCombinations(String digits) {
         List<String> solution = new ArrayList<>();
@@ -197,9 +276,8 @@ public class RecursionSubsetsPattern {
         }
 
         /* This is similar to permute - only difference here is digit place is fixed, we permute over characters for each digit
-            Get all the character for a digit from map, for each character :
-                Add to current solution and recurse for next position, as we are adding this character in function call only,
-                we don't need to backtrack.
+            Get all the character for a digit from map, for each character - add to current solution and recurse for next position,
+            as we are adding this character in function call only, we don't need to backtrack.
          */
         for(Character charInDigit : map.get(digit[position])){
             letterCombinations(digit,position + 1,map,currSolution + charInDigit,solution);
@@ -209,6 +287,8 @@ public class RecursionSubsetsPattern {
     /*
     Generate Parentheses - Given n pairs of parentheses, write a function to generate all combinations of well-formed valid parentheses.
      https://leetcode.com/problems/generate-parentheses/
+     Ex. Input: n = 3
+         Output: ["((()))","(()())","(())()","()(())","()()()"]
      This problem is similar to subset problem - We branch here conditionally. For a valid parentheses, left parentheses should always be
      placed first before right parentheses. This means at any given point in our solution, there could never arise a case where left parentheses
      count could be smaller than right parentheses count.

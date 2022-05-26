@@ -213,7 +213,7 @@ public class ShortestPath {
       Although this question seems difficult to grasp at first - it basically is asking for a path to end where max height of a cell in path is minimum. Because we can
       move any number of cells in constant time - we have to wait t time for cells to be equal. So for any given path - max time taken will be maximum height cell of that path.
 
-      Now that we know this - how can we use Dijkstra algorithm here ? What if we choose a cell based on max-height of path taken from minHeap?
+      Now that we know this - how can we use Dijkstra algorithm here ? We will tweak it to take min-path-height instead of edges weight.
       How do we calculate max-height of a path - it will be maximum of (current max height of path, height of to be newly added cell to path).
       Complexity - O(n^2 * log n ) - grid size * heapify
 

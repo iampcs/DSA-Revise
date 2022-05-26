@@ -39,7 +39,7 @@ public class RecursionBaseHypothesisInduction {
     }
 
     private static void insertAtBottom(Stack<Integer> stack, Integer top) {
-        //Base condition - We want to insert at bottom, means tack should be empty
+        //Base condition - We want to insert at bottom, means stack should be empty
         if(stack.isEmpty()) stack.add(top);
         else {
             //Nth Element
