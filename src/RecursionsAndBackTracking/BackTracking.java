@@ -227,7 +227,7 @@ public class BackTracking {
                 currRow[col] = 'Q';
                 currSolution.add(new String(currRow));
 
-                //Queen placed in current col, place next queen in next column - recurse on next row
+                //Queen placed in current col, place next queen in next row - recurse on next row
                 solveNQueens(n,row+1,columns,diagonal,revDiagonal,currSolution, solution);
 
                 //Backtrack
@@ -249,6 +249,108 @@ public class BackTracking {
     /*
     Sudoku Solver - https://leetcode.com/problems/sudoku-solver/
      */
+
+    /* Word Search - Given an m x n grid of characters board and a string word, return true if word exists in the grid.T
+       The word can be constructed from letters of sequentially adjacent cells, where adjacent cells are horizontally or vertically neighboring.
+       The same letter cell may not be used more than once.
+       Ex. Input: board = [["A","B","C","E"],
+                           ["S","F","C","S"],
+                           ["A","D","E","E"]], word = "ABCCED"
+           Output: true
+      https://leetcode.com/problems/word-search/
+
+      We will perform DFS on all four directions, if we get true from any direction will return true.
+      In worst case - if the word is not present - for each cell in (m x n) cells - we will search (m x n) cells
+      Time complexity - O((m x n)^2)
+     */
+    public boolean exist(char[][] board, String word) {
+        int nRow = board.length;
+        int nCol = board[0].length;
+        boolean[][] visited = new boolean[nRow][nCol];
+        //Word can start from any cell - try from all
+        for(int row = 0; row < nRow; row++){
+            for(int col = 0; col < nCol; col++){
+                //If we got a true from any cell - return true, no need to process any further
+                if(exist(row,col,board,word,0, visited))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean exist(int row, int col, char[][] board, String word, int index, boolean[][] visited) {
+        //No character left to compare - we have found our word - return true
+        //Note: Have conditions which are not dependent on boundaries first
+        if(index == word.length()) return true;
+        if(row < 0 || col < 0 || row == board.length || col == board[0].length || visited[row][col]) return false;
+
+        //Mark this cell as visited - so we don't revisit this again in current DFS call
+        visited[row][col] = true;
+        //If current characters are matching - search for remaining of characters in all directions - return true is word found in any direction
+        if(word.charAt(index) == board[row][col]){
+            boolean result =    exist(row + 1, col,board,word,index + 1,visited) ||
+                                exist(row, col + 1,board,word,index + 1,visited) ||
+                                exist(row - 1, col,board,word,index + 1,visited) ||
+                                exist(row, col - 1,board,word,index + 1,visited);
+
+            if(result == true) return true;
+        }
+        //Can't find in current DFS call - mark the cell as un-visited and return
+        visited[row][col] = false;
+        return false;
+    }
+
+    /* Partition to K Equal Sum Subsets - Given an integer array nums and an integer k, return true if it is possible to divide this array into k non-empty subsets whose sums are all equal.
+       Ex. Input: nums = [4,3,2,3,5,2,1], k = 4
+           Output: true
+           Explanation: It is possible to divide it into 4 subsets (5), (1, 4), (2,3), (2,3) with equal sums.
+
+           https://leetcode.com/problems/partition-to-k-equal-sum-subsets/
+           Let sum be sum of array - so we need each partition to be of sum/k - Create K empty array partitions and start filling numbers one by one until we reach sum
+           If we are unable to fill them all - we return false - we are able to fill them all - we return true.
+     */
+    public boolean canPartitionKSubsets(int[] nums, int k) {
+        //Base cond
+        if (nums == null || nums.length == 0 || k == 0) return false;
+        int sum = Arrays.stream(nums).sum();
+        if (sum % k != 0 || sum < k) return false;
+
+        int[] partitions = new int[k];
+        //This is an optimization technique - it will be easier to distribute numbers among sets with this - also in case of duplicates - this approach will save time
+        Arrays.sort(nums);
+        int partitionSum = sum / k;
+        //We are starting from end of sorted array
+        return possible(nums, partitionSum, partitions, nums.length - 1);
+    }
+
+    boolean possible(int[] nums, int partitionSum, int[] partitions, int idx) {
+        //We have exhausted our numbers list - check if all partitions are equal sum - partitionSum, if yes - we have found a way to partition return true
+        if (idx == -1) {
+            for (int s : partitions) if (s != partitionSum) return false;
+            return true;
+        }
+        //Take number at idx - we will try to fill this number to a partition now
+        int num = nums[idx];
+
+        for (int pIndex = 0; pIndex < partitions.length; pIndex++) {
+            //If we are able to add to current portion
+            if (partitions[pIndex] + num <= partitionSum) {
+                //This is an optimization for TLE - basically for cases where there are duplicates - as array is sorted - we will be filling in descending order
+                //If previous partition with same sum could not handle this number, this one too can't - move to next partition
+                if (pIndex > 0 && partitions[pIndex] == partitions[pIndex - 1]) continue;
+
+                //Add to current partition
+                partitions[pIndex] += num;
+                //Run the same recursive function - which will partitions from 1-K , for next number
+                //If we get a true - return - we only want to confirm presence of a solution - not solution itself
+                if (possible(nums, partitionSum, partitions, idx - 1)) return true;
+                //Backtrack - there is no solution if we add current number to current index - remove from this index - add it to next and try again
+                partitions[pIndex] -= num;
+            }
+        }
+
+        return false;
+    }
 
 
 }
