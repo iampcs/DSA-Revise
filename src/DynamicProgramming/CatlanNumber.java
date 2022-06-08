@@ -149,14 +149,4 @@ points :  N-1 * 2        0           F(N-1) + F(0)
       smaller polygons - which we have already solved
      */
     public int countPolygonTriangulation(int N){ return catlanNumber(N-2); }
-
-
-
-
-
-
-
-
-
-
 }

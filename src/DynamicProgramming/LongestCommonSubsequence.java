@@ -1,8 +1,6 @@
 package DynamicProgramming;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 
 /*
  These are mostly string based problems - where we will be asked to compare two strings or compare with itself and find solution based
@@ -24,9 +22,6 @@ If what is asked is total/All - Its sum of all recursive calls
  */
 public class LongestCommonSubsequence {
     public static void main(String[] args) {
-        int[] nums = new int[]{2,5,3,7,8,1,9};
-        findLBSLength(nums);
-
     }
 
     /* Longest Common Subsequence - Given two strings text1 and text2, return the length of their longest common subsequence.
@@ -35,12 +30,12 @@ public class LongestCommonSubsequence {
      */
     public static int longestCommonSubsequence(String text1, String text2) {
         int solution = 0;
-        //The two changing values to our recursive function are the two indexes - We could have also use a hash-table whose key would be a string (i1 + “|” + i2))
+        //The two changing values to our recursive function are the two indexes - We could have also used a hash-table whose key would be a string (i1 + “|” + i2))
         Integer[][] memo = new Integer[text1.length() + 1][text2.length() + 1];
         Integer[][] dpTable = new Integer[text1.length() + 1][text2.length() + 1];
         //solution = longestCommonSubsequenceBruteForce(text1,text1.length(), text2,text2.length());
-        //solution = longestCommonSubsequenceMemo(text1,text1.length(), text2,text2.length(),memo);
-        solution = longestCommonSubsequenceTabulation(text1,text1.length(), text2,text2.length(),dpTable);
+        solution = longestCommonSubsequenceMemo(text1,text1.length(), text2,text2.length(),memo);
+        //solution = longestCommonSubsequenceTabulation(text1,text1.length(), text2,text2.length(),dpTable);
 
         return solution;
     }
@@ -59,12 +54,12 @@ public class LongestCommonSubsequence {
             //characters are not matching, now we have a choice to make here -
             // Either we skip S1 character and solve for the problem again,
             // or we skip S2 character and solve for the problem again
-            // We can't skip both here as we could be skipping onr of our potential solution
+            // We can't skip both here as we could be skipping one of our potential solution
             //We don't know skipping which one will get us our solution - so we call both those choices and return the one that gives us max count
 
-            int skipFirtStringCharacter = longestCommonSubsequenceBruteForce(S1,N-1,S2,M);
+            int skipFirstStringCharacter = longestCommonSubsequenceBruteForce(S1,N-1,S2,M);
             int skipSecondStringCharacter =  longestCommonSubsequenceBruteForce(S1,N,S2,M-1);
-            return Math.max(skipFirtStringCharacter,skipSecondStringCharacter);
+            return Math.max(skipFirstStringCharacter,skipSecondStringCharacter);
         }
     }
 
@@ -117,7 +112,7 @@ public class LongestCommonSubsequence {
     public static String printSubsequence(String S1, int N, String S2, int M, Integer[][] dpTable){
         StringBuilder solution = new StringBuilder();
 
-        //While we both strings
+        //While we have both strings
         while(N > 0 && M > 0){
             //If characters are equal at index N,M - We used to add it to solution and check for N-1 and M-1
             //We will be doing the same here too
@@ -400,8 +395,8 @@ public class LongestCommonSubsequence {
     public int minOperations(String str1, String str2){
         Integer[][] dpTable = new Integer[str1.length() + 1][str2.length() + 1];
         int lcs = longestCommonSubsequenceTabulation(str1, str1.length(), str2, str2.length(), dpTable);
-
-        return str1.length() +  str2.length() - 2 * lcs;
+        //Common subsequence will be present in both string - remove those - for remaining character we will be doing one operation each
+        return str1.length() +  str2.length() - (2 * lcs);
     }
 
     /* Longest Palindromic Subsequence - Given a string s, find the longest palindromic subsequence's length in s.
@@ -457,7 +452,7 @@ public class LongestCommonSubsequence {
        https://leetcode.com/problems/minimum-insertion-steps-to-make-a-string-palindrome/
        https://www.geeksforgeeks.org/minimum-number-deletions-make-string-palindrome/
 
-       Whether its deletion or insertion or both, approach is same - find the longest palindromic subsequence, one you have that -
+       Whether its deletion or insertion or both, approach is same - find the longest palindromic subsequence, once you have that -
        you can either remove all the remaining characters to make string palindrome or add same characters again in correct order to make the
        string palindrome.
      */
@@ -472,12 +467,11 @@ public class LongestCommonSubsequence {
        https://leetcode.com/problems/longest-palindromic-substring/
 
        This kind of questions are tricky - specially if you have already solved subsequence problems. Approach will be completely
-       different here. We can solve this problem using two ways as both gives O(N^2 solution)
+       different here. We can solve this problem using following ways - O(N^2 solution)
        1. Using DP- tabulation method
        2. Using iteration - expand method - given a character expand left-right to check if it's a part of a palindrome
-
-       We can also solve this using gap-method which fills the table diagonally - DynamicProgramming.MatrixChainMultiplication.createPalindromicTable
-       This approach is explained here - https://www.youtube.com/watch?v=WpYHNHofwjc&list=PL-Jc9J83PIiE-181crLG1xSIWhTGKFiMY&index=71
+       3. Gap-method - which fills the table diagonally - DynamicProgramming.MatrixChainMultiplication.createPalindromicTable
+          This approach is explained here - https://www.youtube.com/watch?v=XmSOWnL6T_I&list=PL-Jc9J83PIiE-181crLG1xSIWhTGKFiMY&index=70
 
      */
     public String longestPalindrome(String s) {
@@ -494,7 +488,7 @@ public class LongestCommonSubsequence {
     private String longestPalindromeExpandMethod(String s, int length) {
         
         if(length < 2) return s;
-        // palindromeVar[0] =palindromeStartIndex ,  palindromeVar[1] = palimdromeMaxLen
+        // palindromeVar[0] =palindromeStartIndex ,  palindromeVar[1] = palindromeMaxLen
         int[] palindromeVar = new int[]{0,0};
         
         for (int index = 0; index < length-1 ; index++ ){
@@ -602,7 +596,7 @@ public class LongestCommonSubsequence {
        https://leetcode.com/problems/longest-increasing-subsequence/
        dpTable[n`] - means the longest increasing subsequence ending at n
        Each number individually is a LIS in itself - so we fill the dpTable with 1
-
+       Complexity - O(N^2)
      */
     public static int lengthOfLIS(int[] nums, int[] dpTable) {
         // dpTable.length will be nums.length
@@ -615,7 +609,7 @@ public class LongestCommonSubsequence {
             //For each number included from above loop - we will check if it can be a part of any existing LIS - if yes we will store the maximum
             for(int j=0; j<i; j++){
                 //If my current number is greater than any previous number, I can be a part of this numbers LIS
-                //Take max of exiting LIS , will be 1 initially, LIS of which [i] can be part of + 1(i itself)
+                //Take max of [exiting number LIS ,  LIS of which [i] can be part of (j) + 1(i itself)
                 if(nums[i] > nums[j]){
                     dpTable[i] = Math.max(dpTable[i], dpTable[j]+1);
                     //If I found a longer LIS for current number  - store it
@@ -631,6 +625,10 @@ public class LongestCommonSubsequence {
        integers in the subsequence are sorted in increasing order i.e. increasing subsequence.
         https://practice.geeksforgeeks.org/problems/maximum-sum-increasing-subsequence4749/1#
         Same logic as above - LIS. Instead of length we are maximizing sum now, so instead of length of each number  i.e 1, we will be using the number itself
+        to initiate the sum array. We will compare each number - num, with all previous numbers - pNum - if num > pNum - means this num can be part of sequence pNum is part of
+        try adding num to pNum's index in sum array - check if we are getting a larger sum than we already have.
+        Keep track of the largest sum while traversing num
+        Complexity - O(N^2)
      */
     public int maxSumIS(int arr[], int n)
     {
@@ -723,7 +721,7 @@ public class LongestCommonSubsequence {
     //2. If item i is smaller than previous item - include i and recurse for remaining items
     //3. Skip i and recurse for remaining items
     private static int findLASBrute(int[] nums, int prevIndex, int currIndex, boolean shouldBeBigger) {
-        //We are our of items - return 0
+        //We are out of items - return 0
         if(currIndex == nums.length) return 0;
 
         int keepItem = 0;
@@ -791,7 +789,7 @@ public class LongestCommonSubsequence {
       1. If characters are matching - No need to perform any operations - recur for next index of both the strings
       2. Characters are not matching ? - We have three choices here - We want the minimum operations here so minimum of all these choices
            2.1. Can insert a character to word1 - recurse for (word1Index , word2Index + 1) - We are not actually inserting a character to word1, just
-                counting an insertion, after insertion word2Index is same so we recurse for next index, we are not actually inserting a character so we will
+                counting an insertion, after insertion word2Index is same so we recurse for next index, we are not actually inserting a character, so we will
                 again recurse from word1Index
            2.2. Can delete a character from word1 - recurse for (word1Index + 1 , word2Index) - Again same logic - not actually deleting a character
                 just making it look like we are doing these operations with index modifications
@@ -872,7 +870,7 @@ public class LongestCommonSubsequence {
         2. If characters at s2Index & s3Index matches - recurse for next indexes
         3. If we reach a point where all three indexes are at their end - we have a solution else we don't
 
-        Now same character can be matching with both s1 & s2 - we don't to which string it belongs to - so we will recurse for both the options - this creates overlapping problems
+        Now same character can be matching with both s1 & s2 - we don't know to which string it belongs to - so we will recurse for both the options - this creates overlapping problems
         Why are not skipping characters here ? Because we don't have that choice - each character in s3 must be matching to either s1 or s2.
         length of s3 = length of s1 + length of s2 - so we can't skip a single character
      */
@@ -881,7 +879,8 @@ public class LongestCommonSubsequence {
 
         //We don't need to take s3 parameter into consideration here because we are checking for condition
         //length3 != length1 + length2 at start of each call
-        //So our memo[n`][m`] is storing result for - if we have s1 till n`, s2 till m` and s3 till n`+m`.Is s3 made up from s1 and s2 interleaving
+        //So our memo[n`][m`] is storing result for - if we have s1 till n`, s2 till m` and s3 till n`+ m`.Is s3 made up from s1 and s2 interleaving
+        //We will be traversing each string backwards
         Boolean[][] memo = new Boolean[s1.length() + 1][s2.length() + 1];
         Boolean[][] dpTable = new Boolean[s1.length() + 1][s2.length() + 1];
         solution = isInterleaveBrute(s1,s2,s3, s1.length(), s2.length(),s3.length());

@@ -1,12 +1,15 @@
 package DynamicProgramming;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 /* Fibonacci numbers are a series of numbers in which each number is the sum of the two preceding numbers.
    Problems in this pattern will be similar.
  */
 public class FibonacciSeries {
     public static void main(String[] args) {
-
-        System.out.println(jump(new int[]{7,8,4,2,0,6,4,1,8,7,1,7,4,1,4,1,2,8,2,7,3,7,8,2,4,4,5,3,5,6,8,5,4,4,7,4,3,4,8,1,1,9,0,8,2}));
 
     }
 
@@ -169,7 +172,6 @@ public class FibonacciSeries {
         return memo[currIndex];
 
     }
-
 
 }
 

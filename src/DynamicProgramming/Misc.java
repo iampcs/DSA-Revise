@@ -50,6 +50,65 @@ public class Misc {
         return false;
     }
 
+    /* Knight Dialer - The chess knight has a unique movement, it may move two squares vertically and one square horizontally, or two squares horizontally and one square vertically (with both forming the shape of an L).
+       We have a chess knight and a phone pad as shown below, the knight can only stand on a numeric cell (i.e. blue cell).
+       Given an integer n, return how many distinct phone numbers of length n we can dial.
+       You are allowed to place the knight on any numeric cell initially, and then you should perform n - 1 jumps to dial a number of length n.
+       All jumps should be valid knight jumps. As the answer may be very large, return the answer modulo 109 + 7.
+       https://leetcode.com/problems/knight-dialer/
+
+
+     */
+    public static final int MOD = 1000000007;
+    public int knightDialer(int n) {
+        //Creating a dialer and all possible directions knight can move to
+        int[][] dialer = new int[][]{{1,2,3},{4,5,6},{7,8,9},{-1,0,-1}};
+        int[] xDir = new int[]{1,1,-1, -1, 2, 2, -2 ,-2};
+        int[] yDir = new int[]{2,-2, 2, -2 , -1, 1, -1, 1};
+
+        int totalSum = 0;
+        //Our memo table will contain info on [jumps,num] - means if we have n jumps left, and we are at number num - how many possible numbers you can form
+        //We know that we can reach to same number and same number of jumps left for many cases - so caching it
+        Integer[][] memo = new Integer[n+1][10];
+        //Try to start from all the numbers on dialer
+        for(int row = 0; row < dialer.length; row++){
+            for(int col = 0; col < dialer[0].length; col++){
+                if(dialer[row][col] != -1){
+                    //Recurse for n-1 jumps
+                    totalSum = (totalSum +  knightDialer(dialer,row,col,n-1, memo,xDir,yDir)) % MOD;
+                }
+            }
+        }
+
+        return totalSum;
+    }
+
+    private int knightDialer(int[][] dialer, int row, int col, int jumps, Integer[][] memo, int[] xDir, int[] yDir) {
+        //Base conditions
+        if(row < 0 || col < 0 || row >= dialer.length || col >= dialer[0].length || dialer[row][col] == -1) return 0;
+        //No more jumps left - we have found a possible number - return 1
+        if(jumps == 0) return 1;
+        //Have we already solved for this?
+        if(memo[jumps][dialer[row][col]] != null) return memo[jumps][dialer[row][col]];
+        //For starting as [row][col] - how many numbers we can form with 'jumps' jump
+        int currSum = 0;
+        //Try all directions
+        for(int dir = 0; dir < xDir.length; dir++){
+            //Move to new direction
+            row = row + xDir[dir];
+            col = col + yDir[dir];
+            //Used one jump for moving - recurse from jump - 1 and new start position
+            currSum = (currSum +  knightDialer(dialer,row,col, jumps - 1, memo,xDir,yDir)) % MOD;
+            //Backtrack
+            row = row - xDir[dir];
+            col = col - yDir[dir];
+
+        }
+
+        memo[jumps][dialer[row][col]] = currSum;
+        return memo[jumps][dialer[row][col]];
+    }
+
 
 }
 

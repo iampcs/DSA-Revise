@@ -1,7 +1,5 @@
 package DynamicProgramming;
 
-import java.util.Arrays;
-
 /* Go through ZeroOneKnapSack before coming here.
    The only difference between the 0/1 Knapsack problem and this problem is that we are allowed to use an unlimited quantity of an item.
 

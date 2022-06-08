@@ -1,13 +1,11 @@
 package BinarySearch;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.OptionalInt;
+import java.util.List;
 
 /* Whenever we are given a sorted Array or LinkedList or Matrix, and we are asked to find a certain element, the best algorithm we can use is the Binary Search
    It's not always the case that DS will be linearly sorted, there could be variations - but even then we can use BinarySearch to optimize the solution from O(N) to O(logN).
-   Although the algorithm is simple, we are prone to make Off By One error a lot - so take special care of indexes.
+   Although the algorithm is simple, we are prone to make - Off By One error a lot - so take special care of indexes.
 
    Sometimes binary search can be used to optimize a brute force solution - Suppose for a problem - we have no other way to solve it other than trying all possible solution from
    (min to max). In this case our complexity will be O( max * something), we can optimize this a bit by not trying from min to max but apply binary search on this range to find
@@ -135,7 +133,7 @@ public class BinarySearch {
     [0,1,2,4,5,6,7] if it was rotated 7 times.
     Notice that rotating an array [a[0], a[1], a[2], ..., a[n-1]] 1 time results in the array [a[n-1], a[0], a[1], a[2], ..., a[n-2]].
     Given the sorted rotated array nums of unique elements, return the minimum element of this array.
-    https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/
+    https://leetcode.com/pro bnj-blems/find-minimum-in-rotated-sorted-array/
 
     This question can also be read as - find rotation count of a rotated array.
     If we observe the rotated array - we can observe that our minimum element is the only element - which is smaller than its left and right both sides. We have use binary search to
@@ -149,7 +147,7 @@ public class BinarySearch {
         while (start < end){
             int mid = start + (end -start)/ 2;
 
-            //We are taking care of array rotation here by checking mid is not at start or end of array
+            //We are taking care of array out of bound by checking mid is not at start or end of array
             //If mid has not reached end & mid is greater than next element - this can only happen if next element is the smallest
             if(mid < end && nums[mid] > nums[mid + 1]) return nums[mid + 1];
             //If mid has not reached start & mid is smaller than previous element - this can only happen if mid itself is smallest
@@ -157,7 +155,7 @@ public class BinarySearch {
 
             //If this condition is true - means left side array is sorted - our pivot - minimum element will be on other side
             if(nums[start] < nums[mid]) start = mid + 1;
-            //Left side is not sorted - pivot must b eon this side only
+            //Left side is not sorted - pivot must be on this side only
             else end = mid - 1;
         }
 
@@ -200,7 +198,7 @@ public class BinarySearch {
         if(mid > start && nums[mid - 1] == target) return mid -1 ;
         if(mid < end && nums[mid + 1] == target) return mid + 1;
 
-        //Here we know that target is not any of mid possible values - if target is bigger than mid - it's bigger than mid+1 and mod - 1 too and vice versa
+        //Here we know that target is not any of mid possible values - if target is bigger than mid - it's bigger than mid+1 and mid - 1 too and vice versa
         return nums[mid] > target ? binarySearchNearlySorted(nums, start, mid - 2, target) : binarySearchNearlySorted(nums, mid + 2, end, target) ;
     }
 
@@ -270,7 +268,7 @@ public class BinarySearch {
         return ceil != -1 ? nums[ceil] : ceil;
     }
 
-    /* Find Smallest Letter Greater Than Target - Given a characters array letters that is sorted in non-decreasing order and a character target,
+    /* Find The Smallest Letter Greater Than Target - Given a characters array letters that is sorted in non-decreasing order and a character target,
        return the smallest character in the array that is larger than target.
        Note that the letters wrap around. For example, if target == 'z' and letters == ['a', 'b'], the answer is 'a'.
        https://leetcode.com/problems/find-smallest-letter-greater-than-target/
@@ -278,7 +276,6 @@ public class BinarySearch {
        This problem is similar to ceil - only difference - we want the next element - so if we find a potential solution - letters[mid] > target we store the potential
        solution and traverse left
        Else we traverse right - also in case of letters[mid] == target
-       Also we will always have a solution here because of character wrapping here - So we can take modulo if ceil instead of ceil.
      */
     public char nextGreatestLetter(char[] letters, char target) {
         int ceil = 0;
@@ -295,12 +292,13 @@ public class BinarySearch {
                 start = mid + 1;
             }
         }
-        return letters[ceil % letters.length];
+        return letters[ceil];
     }
 
     /* Single Element in a Sorted Array - You are given a sorted array consisting of only integers where every element appears exactly twice, except for one element which appears exactly once.
        Return the single element that appears only once.
        https://leetcode.com/problems/single-element-in-a-sorted-array/
+       We can perform a XOR operation on whole array which will give us the single non-repeated element - but this will be O(n) operation.
        Array is sorted so that's a hint to use binary search. Now we have to find this element based on a property - that it is the only non-duplicated element means element on its left
        and right are different - that our equivalent to comparing middle element in plain binary search.
        Now how should we partition based on mid-comparison? If we have a sorted array with each number occurring twice - the number at even index will be same as index - 1 (except 0)
@@ -527,5 +525,25 @@ public class BinarySearch {
         It's very difficult to come up with this solution - we will be using the soul behind binary search here
         Explanation - https://www.youtube.com/watch?v=q6IEA26hvXc&list=PLot-Xpze53leNZQd0iINpD-MAhMOMzWvO&index=13
      */
+
+    public double findMedianSortedArrays(final List<Integer> A1, final List<Integer> A2) {
+
+        int m = A1.size(), n = A2.size();
+        int mid1 = (m + n + 1) / 2, mid2 = (m + n + 2) / 2;
+        return (findKth(A1, 0, m, A2, 0, n, mid1) + findKth(A1, 0, m, A2, 0, n, mid2)) / 2;
+
+    }
+    private double findKth(final List<Integer> A1, int s1, int m, final List<Integer> A2, int s2, int n, int k) {
+        if (m > n) return findKth(A2, s2, n, A1, s1, m, k);
+        if (m == 0) return A2.get(s2 + k - 1);
+        if (k == 1) return Math.min(A1.get(s1), A2.get(s2));
+
+        int i = Math.min(m, k / 2), j = Math.min(n, k / 2);
+        if (A1.get(s1 + i - 1) < A2.get(s2 + j - 1)) {
+            return findKth(A1, s1 + i, m - i, A2, s2, n, k - i);
+        } else {
+            return findKth(A1, s1, m, A2, s2 + j, n - j, k - j);
+        }
+    }
 
 }

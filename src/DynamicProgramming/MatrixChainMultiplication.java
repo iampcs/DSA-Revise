@@ -82,9 +82,9 @@ public class MatrixChainMultiplication {
         //Partitioning from start till end - 1, we need a case where both partition have at-least one matrix
         for(int partition = start; partition < end ; partition++){
             //Cost of left partition - start to partition
-            int leftPartitionCost = findOptimalProductBruteForce(dims, start, partition);
+            int leftPartitionCost = findOptimalProductMemo(dims, start, partition,memo);
             //Cost of right partition - partition + 1 to end
-            int rightPartitionCost = findOptimalProductBruteForce(dims, partition + 1, end);
+            int rightPartitionCost = findOptimalProductMemo(dims, partition + 1, end,memo);
             //Cost to multiply these two partitions
             int cost = dims[start - 1] * dims[partition] * dims[end];
             //Total cost of multiplying with this arrangement of partition
