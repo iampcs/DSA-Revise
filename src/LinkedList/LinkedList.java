@@ -1,9 +1,6 @@
 package LinkedList;
 
-import java.awt.*;
 import java.util.HashMap;
-import java.util.List;
-
 /*
 There are mostly two types of questions regarding LinkedList
 1. Can be solved using fast-slow pointer
