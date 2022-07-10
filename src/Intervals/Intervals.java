@@ -23,10 +23,6 @@ public class Intervals {
             Output: [[1,6],[8,10],[15,18]]
             Explanation: Since intervals [1,3] and [2,6] overlaps, merge them into [1,6].
             https://leetcode.com/problems/merge-intervals/
-       Of the four mentioned scenarios above - we need to merge intervals for case 2,3 and 4.
-       Case 2 : Create a new interval with a start and b end (a.start, b.end)
-       Case 3 : (a.start,a.end)
-       Case 4: (a.start. a.end)
 
        These are visual problems - means drawing these intervals on number line - it makes it very easier understand what is asked and how to solve the problem
        Check - https://www.youtube.com/watch?v=44H3cEC2fFM
@@ -35,7 +31,8 @@ public class Intervals {
        2. Check if second interval overlaps with first - If it does - create a new merge interval c with (a.start , max(a.end, b.end)) - replace a and b with c
        3. Move to next interval
 
-       Code is ugly due to input and output format - could look better if Lists are used
+       Code is ugly due to input and output format - could look better if Lists were used
+       Time Complexity - O(NlogN) for sorting - O(N) for merging -> O(NLogN)
      */
     public int[][] merge(int[][] intervals) {
         //Sort intervals array based on start time
@@ -50,9 +47,9 @@ public class Intervals {
         for(int interval = 1; interval < intervals.length; interval++){
             //Store last interval in our solution - we will compare next interval with this - We know for sure that start time won't change, Why?
             //We will be modifying end time, if this new interval overlaps
-            int[] lastInterval = mergedIntervals[mergeIndex];
+            int[] previousInterval = mergedIntervals[mergeIndex];
             //Check if interval overlaps - current Interval start <= merged Interval end
-            if(intervals[interval][0] <= lastInterval[1])
+            if(intervals[interval][0] <= previousInterval[1])
                 //Modify merged interval end to store max of both end - We cover all cases here
                 mergedIntervals[mergeIndex][1] = Math.max(mergedIntervals[mergeIndex][1], intervals[interval][1]);
             //Interval don't overlap - add it to our solution as it is
@@ -144,8 +141,9 @@ public class Intervals {
         for(int interval = 1; interval < intervals.length; interval++){
             //Overlapping condition - b.start < a.end
             if(intervals[interval][0] < endInterval ){
+                //We are not actually deleting an interval - In future we will ignore its end
                 deleteCount += 1;
-                //We will remove the one with max end or keep the one with minimum end
+                //We will remove the one with max end or keep the one with minimum end - update endInterval - ignore the one with max end
                 endInterval = Math.min(endInterval, intervals[interval][1]);
             }else {
                 //Non overlapping - update end
@@ -169,10 +167,12 @@ public class Intervals {
         Approach :
         1. Create a new mergedList which contains intervals from both in sorted order - as both the lists are already sorted - this can be done in O(N+M)
         2. For consecutive intervals (a,b) we have the following cases:
-            i)  a.end < b.start : non-overlapping - do nothing
-            ii) a.end >= b.start and a.end < b.end : Overlapping - add intersection to intersections - min(a.end, b.start), min(a.end,b.end) :
+            1)  a.end < b.start : non-overlapping - do nothing
+            2) a.end >= b.start and a.end < b.end : Overlapping - add intersection to intersections - min(a.end, b.start), min(a.end,b.end) :
                 Eg. [5,10][5,6] : Intersection :  min(10,5), min(10,6) -> (5,6)
-            iii) a.end > b.end : Overlapping - here b is inside a - its possible that a can have intersection with c - in this case we can do (b.end = a.end)
+                2.1) a.end > b.end : Overlapping - here b is inside a - its possible that a can have intersection with c - in this case we can do (b.end = a.end)
+                     In our code we are traversing the intervals one by one - if a previous interval end is longer than current interval end - when we move to next interval,
+                     we will miss this info - so as a hack we are modifying current interval end to previous interval's end.
 
        Note: This problem can also be solved using two-pointer approach. Although the complexity will be same - but it will save on space.
      */
@@ -242,11 +242,11 @@ public class Intervals {
     }
     /* Meeting Rooms II - Given an array of meeting time intervals consisting of start and end times [[s1,e1],[s2,e2],...] (si < ei), find the minimum number of conference rooms required.)
        (0,8),(8,10) is not conflict at 8
-
+       https://www.lintcode.com/problem/919/
 
        We need to find maximum overlapping intervals here. This problem is different from rest of problems we solved - If we try to sort the array based on start time or end time
        we will not get maximum overlapping intervals here - I tried - there will be missed case - because we can have one interval at a time while iterating it's not possible to cover
-       all use case. We can solve it that way by  keep track of the ending time of all the meetings currently happening so that when we try to schedule a new meeting,
+       all use case. We can solve it that way by keep track of the ending time of all the meetings currently happening so that when we try to schedule a new meeting,
        we can see what meetings have already ended. We need to put this information in a data structure that can easily give us the smallest ending time.
        A Min Heap would fit our requirements best.
        We have solved it using both the approaches.
@@ -254,7 +254,7 @@ public class Intervals {
        Approach:
        1. Sort all the meetings on their start time.
        2. Create a min-heap to store all the active meetings - How? Let this min-Heap be sorted based on end timings. A meeting m1 is in heap top - we want to add m2 - Now think m2 will be added at m2.start time - if m1.end is less than
-          or equal to m2.start - means when we were adding m2, m1 has already ended. So we will remove m1, this was we can store all active meetings.
+          or equal to m2.start - means when we were adding m2, m1 has already ended. So we will remove m1, this is how we can store all active meetings.
        3. Iterate through all the meetings one by one to add them in the min-heap. Let’s say we are trying to schedule the meeting m1.
        4. Since the min-heap contains all the active meetings, so before scheduling m1 we can remove all meetings from the heap that have ended before m1, i.e.,
           remove all meetings from the heap that have an end time smaller than or equal to the start time of m1.

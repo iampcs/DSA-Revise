@@ -114,8 +114,11 @@ public class FixedWindowSize {
     /*
     Count Occurrences of Anagrams - Given a word pat and a text txt.
     Return the count of the occurrences of anagrams of the word in the text.
+    Input: txt = forxxorfxdofr pat = for
+    Output: 3
+    Explanation: for, orf and ofr appears in the txt, hence answer is 3.
     https://practice.geeksforgeeks.org/problems/count-occurences-of-anagrams5839/1#
-    Hint: Main HashMap to track charater occurrences
+    Hint: Main HashMap to track charter occurrences
     */
     static int countAnagrams(String pat, String txt) {
         int solution = 0;

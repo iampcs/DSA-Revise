@@ -8,7 +8,7 @@ Template for level traversal is simple - tracking levels based on a limiter
 2. While !queue.isEmpty()
     * poll element from queue - poll()
     * if element
-        add left & right child if not empty
+        add left & right child if not empty - can vary based on constraints
     * else delimiter
         perform operations you want to do after every level change
         add delimiter to queue if queue is not empty - to track new level
@@ -70,7 +70,7 @@ public class BreadthFirstSearch {
        Return the smallest level x such that the sum of all the values of nodes at level x is maximal.
        https://leetcode.com/problems/maximum-level-sum-of-a-binary-tree/
 
-       //Just do a level order traversal and keep track of current level sum and maxSum - return the level with maxSum
+       Just do a level order traversal and keep track of current level sum and maxSum - return the level with maxSum
 
      */
     public int maxLevelSum(TreeNode root) {
@@ -188,7 +188,6 @@ public class BreadthFirstSearch {
                     solution.add(new ArrayList<>(currLevel));
                     currLevel.clear();
                 }
-                currLevel.clear();
 
                 if(!queue.isEmpty()) queue.add(null);
             }
@@ -250,30 +249,12 @@ public class BreadthFirstSearch {
                 Node cur = q.poll();
                 cur.next = rightNode;
                 rightNode = cur;
-                //Observe this - We are traversing from right to left - so that for every left there is a right
+                //Observe this - We are traversing(storing in queue) from right to left - so that for every left there is a right
                 if(cur.right != null)  q.offer(cur.right);
                 if(cur.left != null)   q.offer(cur.left);
 
             }
         }
-        return root;
-    }
-    //DFS approach
-    public Node connectDFS(Node root) {
-        if(root == null) return null;
-        Node leftChild = root.left, rightChild = root.right, nextPointer = root.next;
-        if(leftChild != null) {
-            //Draw this on a piece of paper - it's easier to understand if we have a visual diagram here
-            //Null case is covered here
-            leftChild.next = rightChild;
-            //We want to connect current root right child to current root sibling's left child
-            //We are using next pointer here cleverly
-            if(nextPointer != null) rightChild.next = nextPointer.left;
-
-            connect(leftChild);
-            connect(rightChild);
-        }
-
         return root;
     }
 

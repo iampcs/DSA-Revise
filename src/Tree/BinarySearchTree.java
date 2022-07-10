@@ -14,11 +14,8 @@ Basic operations differ here from binary trees like
     4. Inorder traversal gives a sorted list.
     5. We can create a BST with only preOrder, postOrder, levelOrder traversal. We can retrieve inOrder from sorting any given order.
 
-Inorder predecessor will the element in tree just smaller than current node - this could be right most node
-of left subtree if exist or the first left ancestor. Similarly, inorder successor will be element in tree just greater than current node - this will be
-either left most element in right subtree or first right ancestor in case subtree don't exist.
-
-
+Inorder predecessor will the element in tree just smaller than current node - this could be right most node of left subtree if exist or the first left ancestor.
+Similarly, inorder successor will be element in tree just greater than current node - this will be either left most element in right subtree or first right ancestor in case subtree don't exist.
  */
 public class BinarySearchTree {
 

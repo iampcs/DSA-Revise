@@ -18,7 +18,6 @@ this to match with our question ? We will be solving some problems like this.
  */
 public class ShortestPath {
     public static void main(String[] args) {
-        swimInWater( new int[][]{{0,2},{1,3}});
     }
 
     /* SSSP in undirected unweighted(Can also be interpreted as weight of 1 per edge) graph using BFS
@@ -97,6 +96,50 @@ public class ShortestPath {
         return paths;
     }
 
+    /* Bellman-Ford Algorithm for Shortest Path : O(VE)- Dijkstra doesn't work for Graphs with negative weight edges, it gives an incorrect solution.
+       Bellman-Ford works for such graphs - even though it can't give you a correct solution - because it doesn't exist for a negative cycle,
+       but it can detect a negative cycle. Bellman-Ford is also simpler than Dijkstra and suites well for distributed systems. But time complexity of Bellman-Ford is O(VE)
+       https://practice.geeksforgeeks.org/problems/negative-weight-cycle3504/1
+
+       It works on a simple idea - the shortest length(not weight) of the shortest path will be (V - 1). It runs a loop V-1 times and relaxes edges
+       one by one - so with each iteration we will get closer to our shortest path - because it starts with length 1, and then keep adding to it each iteration
+       it can be seen as bottoms up approach of DP.
+       Algorithm:
+       1. Initiate distance array distance[V] with all values as infinite, set distance of source to 0, distance[source] = 0
+       2. loop - (V-1) times - By end of this we will be guaranteed to have a shortest path of length (V-1), if exists
+           For each edge (u,v)
+           if : distance[v] > distance[u] + weight(u,v)
+                distance[v] = distance[u] + weight(u,v)
+       3. Run this for loop one more time, if shortest path is changing - there is a negative cycle
+
+       Can watch this video for ref -  https://www.youtube.com/watch?v=FrLWd1tJ_Wc
+     */
+    public int isNegativeWeightCycle(int n, int[][] edges)
+    {
+        int[] distance = new int[n];
+        Arrays.fill(distance, Integer.MAX_VALUE);
+        //Making 0th vertex as source index - it could be any index
+        distance[0] = 0;
+
+        for(int count = 0; count < n - 1; count++){
+            for(int[] edge : edges){
+                //Updating distance if we found a path with less weight
+                //if : distance[v] > distance[u] + weight(u,v)
+                //     distance[v] = distance[u] + weight(u,v)
+                if(distance[edge[0]] != Integer.MAX_VALUE && distance[edge[1]] > distance[edge[0]] + edge[2])
+                    distance[edge[1]] = distance[edge[0]] + edge[2];
+            }
+        }
+        //Running this loop one more time to detect negative cycle
+        for(int[] edge : edges){
+            //We can still find a path with less weight - means there is a negative cycle
+            if(distance[edge[1]] > distance[edge[0]] + edge[2])
+                return 1;
+        }
+
+        return 0;
+    }
+
     /* Network Delay Time - You are given a network of n nodes, labeled from 1 to n. You are also given times, a list of travel times as directed edges times[i] = (ui, vi, wi), where ui is the source node, vi is the target node, and wi is the time it takes for a signal to travel from source to target.
        We will send a signal from a given node k. Return the time it takes for all the n nodes to receive the signal. If it is impossible for all the n nodes to receive the signal, return -1.
        https://leetcode.com/problems/network-delay-time/
@@ -164,7 +207,10 @@ public class ShortestPath {
             //int[0] : target node, int[1]: edge weight to reach target node, int[2] = k - or vertices between source-destination
             int[] currNode = minheap.poll();
 
+            //This is a greedy approach - first solution is the correct solution - return as soon as destination is reached.
             if(currNode[0] == dst) return currNode[1];
+            //We are not maintaining a visited array - because it is allowed to visit a node twice from diff ways
+            //Instead we are adding nodes based on if we have any stops left
             if(currNode[2] > 0){
                 for (int[] edge : adjList.get(currNode[0])){
                     minheap.add(new int[]{edge[0], currNode[1] + edge[1] , currNode[2] - 1});
@@ -180,9 +226,9 @@ public class ShortestPath {
         Arrays.fill(distance, Integer.MAX_VALUE);
         distance[src] = 0; // 0 needed to reach 0;
 
-        //k is the number os stops excluding source and destination - so we can run the loop k+1 times
+        //k is the number of stops excluding source and destination - so we can run the loop k+1 times
         for(int i = 0; i < k+1; i++){
-            //Note: This is a changes approach from Bellman Ford - Because we strictly want to calculate for single length - we won't be using original distance array
+            //Note: This is a changed approach from Bellman Ford - Because we strictly want to calculate for single length - we won't be using original distance array
             //Suppose in original array we relax edge(u,v) and then pick edge(v,w) - here we will be relaxing w too, which is not possible with length 1 per iteration
             //So we will maintain a iterationDistance temporary distance array - to record changes in this iteration
             int[] iterationDistance = distance.clone();
@@ -303,53 +349,6 @@ public class ShortestPath {
         }
         return 0;
     }
-
-    /* Bellman-Ford Algorithm for Shortest Path : O(VE)- Dijkstra doesn't work for Graphs with negative weight edges, it gives an incorrect solution.
-       Bellman-Ford works for such graphs - even though it can't give you a correct solution - because it doesn't exist for a negative cycle,
-       but it can detect a negative cycle. Bellman-Ford is also simpler than Dijkstra and suites well for distributed systems. But time complexity of Bellman-Ford is O(VE)
-       https://practice.geeksforgeeks.org/problems/negative-weight-cycle3504/1
-
-       It works on a simple idea - the shortest length(not weight) of the shortest path will be (V - 1). It runs a loop V-1 times and relaxes edges
-       one by one - so with each iteration we will get closer to our shortest path - because it starts with length 1, and then keep adding to it each iteration
-       it can be seen as bottoms up approach of DP.
-       Algorithm:
-       1. Initiate distance array distance[V] with all values as infinite, set distance of source to 0, distance[source] = 0
-       2. loop - (V-1) times - By end of this we will be guaranteed to have a shortest path of length (V-1), if exists
-           For each edge (u,v)
-           if : distance[v] > distance[u] + weight(u,v)
-                distance[v] = distance[u] + weight(u,v)
-       3. Run this for loop one more time, if shortest path is changing - there is a negative cycle
-
-       Can watch this video for ref -  https://www.youtube.com/watch?v=FrLWd1tJ_Wc
-     */
-    public int isNegativeWeightCycle(int n, int[][] edges)
-    {
-        int[] distance = new int[n];
-        Arrays.fill(distance, Integer.MAX_VALUE);
-        //Making 0th vertex as source index - it could be any index
-        distance[0] = 0;
-
-        for(int count = 0; count < n - 1; count++){
-            for(int[] edge : edges){
-                //Updating distance if we found a path with less weight
-                //if : distance[v] > distance[u] + weight(u,v)
-                //     distance[v] = distance[u] + weight(u,v)
-                if(distance[edge[0]] != Integer.MAX_VALUE && distance[edge[1]] > distance[edge[0]] + edge[2])
-                    distance[edge[1]] = distance[edge[0]] + edge[2];
-            }
-        }
-        //Running this loop one more time to detect negative cycle
-        for(int[] edge : edges){
-            //We can still find a path with less weight - means there is a negative cycle
-            if(distance[edge[1]] > distance[edge[0]] + edge[2])
-                return 1;
-        }
-
-        return 0;
-    }
-
-
-
 
 
     class Edge    {

@@ -43,7 +43,7 @@ public class Traversal {
     }
 
     private void dfsOfGraph(int currentVertex, ArrayList<ArrayList<Integer>> adjList, boolean[] visited, ArrayList<Integer> dfsPath) {
-        //Add current vertex to path and mark it as visited
+        //Add current vertex to path and mark it as visited - This method won't be called for a vertex already visited - check below
         dfsPath.add(currentVertex);
         visited[currentVertex] = true;
         //Fetch all the neighbours of current vertex - this can also be achieved with an iterator
@@ -88,6 +88,8 @@ public class Traversal {
     /* Find if Path Exists in Graph - Given edges and the integers n, source, and destination, return true if there is a valid path from source to destination, or false otherwise.
        https://leetcode.com/problems/find-if-path-exists-in-graph/
        Will perform DFS from source to check if we will ever reach destination.
+       This problem can be better solved using Union-Find data structure - When ever we are given edges instead of adjList or adjMatrix
+       and question is of connectivity - UnionFind will be a better solution.
      */
     public boolean validPath(int n, int[][] edges, int source, int destination) {
         boolean[] visited = new boolean[n];
@@ -134,11 +136,11 @@ public class Traversal {
        Similar to previous problem - just that instead of returning true and stopping when we reach destination, we will store current path instead
        Even though its mentioned here that graph is acyclic - we will solve it as a cyclic graph - to have a generic code
      */
-    public List<List<Integer>> allPathsSourceTarget(int[][] graph) {
-        int vertices = graph.length;
+    public List<List<Integer>> allPathsSourceTarget(int[][] adjList) {
+        int vertices = adjList.length;
         List<List<Integer>> allPaths = new ArrayList<>();
         boolean[] visited = new boolean[vertices];
-        allPathsSourceTarget(graph, 0, vertices - 1, visited, new ArrayList<Integer>(), allPaths);
+        allPathsSourceTarget(adjList, 0, vertices - 1, visited, new ArrayList<Integer>(), allPaths);
         return allPaths;
     }
 
@@ -172,7 +174,7 @@ public class Traversal {
 
     }
     /* Max Area of Island - You are given an m x n binary matrix grid. An island is a group of 1's (representing land) connected 4-directionally (horizontal or vertical.)
-       You may assume all four edges of the grid are surrounded by water. The area of an island is the number of cells with a value 1 in the island.
+       You may assume all four edges of the grid are surrounded by water. The area of an island is the number of cells with a value 1 on the island.
        Return the maximum area of an island in grid. If there is no island, return 0.
        https://leetcode.com/problems/max-area-of-island/
 
@@ -343,7 +345,7 @@ public class Traversal {
                 else if(grid[r][c] == 2) queue.add(List.of(r,c));
             }
         }
-
+        //If there are no fresh oranges - we are done there - no point increasing our time
         while (!queue.isEmpty() && fresh != 0){
             //Run BFS on all oranges at time = t
             int qSize = queue.size();
@@ -411,16 +413,19 @@ public class Traversal {
             int qSize = queue.size();
             //For all gates
             for(int q = 0; q < qSize; q++){
-                List<Integer> currQueue = queue.poll();
+                List<Integer> currGate = queue.poll();
                 //Perform bfs on all four directions
                 for(int[] direction : directions){
-                    int currRow = currQueue.get(0) + direction[0];
-                    int currCol = currQueue.get(1) + direction[1];
+                    int currGateRow = currGate.get(0) + direction[0];
+                    int currGateCol = currGate.get(1) + direction[1];
                     //Skip this cell if - its outside board, it's an obstacle or somebody(other gate) has already populated a value - means it's closer to that gate
-                    if(currRow < 0 || currRow == row || currCol < 0 || currCol  == col || rooms[currRow][currCol] == -1 || rooms[currRow][currCol] < length) continue;
+                    if(currGateRow < 0 || currGateRow == row ||
+                            currGateCol < 0 || currGateCol  == col ||
+                            rooms[currGateRow][currGateCol] == -1 || rooms[currGateRow][currGateCol] < length) continue;
                     //Room is closer to current gate - update length & add to queue for performing bfs for next batch
-                    rooms[currRow][currCol] = length;
-                    queue.add(List.of(currRow,currCol));
+                    rooms[currGateRow][currGateCol] = length;
+                    //Why are we adding rooms in a queue made for gates? Well, these rooms will act as passage to gate for neighbours rooms.
+                    queue.add(List.of(currGateRow,currGateCol));
                 }
             }
             //For next bfs iteration length will be increased by 1

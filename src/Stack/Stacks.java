@@ -1,9 +1,6 @@
 package Stack;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Stack;
+import java.util.*;
 
 /* Stack questions will always be optimization problems - These problems could also be solved using brute-force, but with stacks we can do this
    in linear time. First few problems will cover basic on how to think in terms of stacks - how we can save on multiple traversal costs.

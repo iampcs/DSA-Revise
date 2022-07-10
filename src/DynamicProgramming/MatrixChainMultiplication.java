@@ -226,7 +226,7 @@ public class MatrixChainMultiplication {
         Boolean[][] palindromicTable = new Boolean[s.length()][s.length()];
         //For an array      A B C
         //Gap from A to -   0 1 2
-        //We are taking this approach to fill the table diagnostically
+        //We are taking this approach to fill the table diagonally
         //How to fill it on paper - https://youtu.be/qmTtAbOTqcg?list=PL-Jc9J83PIiE-181crLG1xSIWhTGKFiMY&t=327
         for(int gap = 0; gap < s.length(); gap++){
             for(int start = 0, end = gap; end < palindromicTable.length; start++, end++){
@@ -242,6 +242,32 @@ public class MatrixChainMultiplication {
     }
 
     //TODO : Boolean Parenthesization , Scrambled String, Egg dropping, Bursting Baloon
+
+    public int minPathSum(int[][] grid) {
+        int row = grid.length;
+        int col = grid[0].length;
+        Integer[][] memo = new Integer[row][col];
+
+        int solution = minPathSum(grid,memo, 0,0, row, col);
+
+        return solution;
+    }
+
+    private int minPathSum(int[][] grid, Integer[][] memo, int currRow, int currCol, int row, int col) {
+        if(currCol == col - 1 && currRow == row - 1) return grid[currCol][currRow];
+        if(currRow == row || currCol == col) return 0;
+        if(memo[currCol][currCol] != null ) return memo[currCol][currRow];
+
+        int right = grid[currRow][currCol] + minPathSum(grid,memo,currRow , currCol + 1, row, col);
+        int down = grid[currRow][currCol] + minPathSum(grid, memo, currRow + 1, currCol, row, col);
+
+        memo[currRow][currCol] = Math.min(right, down);
+
+
+        return memo[currRow][currCol];
+    }
+
+
 
 
 }

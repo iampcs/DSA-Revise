@@ -63,7 +63,7 @@ public class TopologicalSort {
         return topologicalSort;
     }
     /* Topological Sort with DFS - Approach is similar to DFS of graph
-      1. We will maintain a visited[] array to check is a node is already visited - Why, if there are no cycle ? Eve if there are no cycle - a node can be reached by two ways
+      1. We will maintain a visited[] array to check is a node is already visited - Why, if there are no cycle ? Even if there are no cycle - a node can be reached by two ways
          In case of BFS we were starting for a node with no dependencies - we are guaranteed not to add source twice - in DFS its random.
       2. Maintain a List to store topological sort
       3. Idea behind DFS is simple - For any node 'a', all its dependents (b,c) should be added to sorting list first and then a - [a,b,c]

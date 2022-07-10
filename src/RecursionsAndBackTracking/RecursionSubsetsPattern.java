@@ -62,6 +62,8 @@ public class RecursionSubsetsPattern {
 
     /* Subsets -  Given an integer array nums of unique elements, return all possible subsets (the power set).
     https://leetcode.com/problems/subsets/
+    Input: nums = [1,2,3]
+    Output: [[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]
     */
     public List<List<Integer>> subsets(int[] nums) {
         /* Set to only contain unique elements */
@@ -90,6 +92,17 @@ public class RecursionSubsetsPattern {
     }
     /* Given a set of distinct integers, S, return all possible subsets. - The subsets should be sorted in ascending ( lexicographic ) order.
        https://www.interviewbit.com/problems/subset/
+       If S = [1,2,3], a solution is:
+       [
+            [],
+            [1],
+            [1, 2],
+            [1, 2, 3],
+            [1, 3],
+            [2],
+            [2, 3],
+            [3],
+        ]
 
        The only difference here is to print it lexicographically - How can we do it? The idea is to sort it first.
        Then start fixing one element from this sorted order - and run the recursive function on rest

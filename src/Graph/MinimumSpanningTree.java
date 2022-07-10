@@ -53,8 +53,8 @@ public class MinimumSpanningTree {
             for(ArrayList<Integer> edge : adjList.get(currentEdge.destination)){
                 minHeap.add(new Edge(currentEdge.destination, edge.get(0),edge.get(1)));
             }
-            //This condition to skip the imaginary edge we added - We could have added all edges from 0 to minHeap and start too - but this is more neat
-            if(currentEdge.source != -1) mstWeight += currentEdge.weight;
+            //Even the imaginary edge weight will be added here - but it's 0, so doesn't matter
+            mstWeight += currentEdge.weight;
         }
         //In case of a disconnected graph we won't be able to visit all the vertices - return -1 in that case.
         return visited.size() == V ? mstWeight : -1;
@@ -71,13 +71,39 @@ public class MinimumSpanningTree {
             this.weight = weight;
         }
     }
+    /* Kruskal’s Algorithm for finding Minimum Spanning Tree - Greedy algorithm to find MST. This uses disjointSets to determine if there is a cycle in a graph, if not adds that edge to solution
+      Algorithm :
+      1. Sort edges based on weight - can sort whole array or use a minHeap of size V-1 to get smallest edge
+      2. Pick an edge - check if adding this edge can cause a cycle in graph - if not - add to MST, else skip
+      3. Repeat 2 until we have V-1 edges.
+      Visual Representation - https://www.techiedelight.com/kruskals-algorithm-for-finding-minimum-spanning-tree/
+      https://techiedelight.com/practice/?problem=MinimumSpanningTree
+
+    */
+    public Set<DisjointSets.Edge> constructMinimumSpanningTree(List<DisjointSets.Edge> edges, int V) {
+        Set<DisjointSets.Edge> mst = new HashSet<>();
+        DisjointSets.UnionFind unionFind = new DisjointSets.UnionFind(V);
+        Collections.sort(edges, Comparator.comparingInt(a -> a.weight));
+        Iterator<DisjointSets.Edge> edgeIterator = edges.iterator();
+        //We want to stop if there are no more edges left, or we have already picked up V-1 edges
+        while (edgeIterator.hasNext() && mst.size() < V) {
+            DisjointSets.Edge currEdge = edgeIterator.next();
+            //A cycle will form if we add this edge - Skip
+            if (unionFind.isCycle(currEdge.source, currEdge.dest)) continue;
+            //Do a union of vertices - add this edge to mst
+            unionFind.unionByRank(currEdge.source, currEdge.dest);
+            mst.add(currEdge);
+        }
+
+        return mst.size() == V - 1 ? mst : null;
+    }
 
     /* Connecting Cities With Minimum Cost - There are ‘N’ cities numbered from 1 to ‘N’ and ‘M’ roads. Each road connects two different cities and described as a two-way road using three integers (‘U’, ‘V’, ‘W’) which represents the cost ‘W’ to connect city ‘U’ and city ‘V’ together.
        Now, you are supposed to find the minimum cost so that for every pair of cities, there exists a path of connections (possibly of length 1) that connects those two cities together. The cost is the sum of the connection costs used. If the task is impossible, return -1.
        https://www.codingninjas.com/codestudio/problems/connecting-cities-with-minimum-cost_1386586
 
        This is a use case of MST - will convert the input to a format of problem - spanningTree.
-       Note: For problem where we are provided all edges - Kruskal's too can be used - specially if edges are already sorted by weight.
+       Note: For problem where we are provided all edges - Kruskal's (Uses Union-Find) too can be used - specially if edges are already sorted by weight.
      */
     public static int getMinimumCost(int n, int m, int[][] connections) {
 
@@ -100,7 +126,6 @@ public class MinimumSpanningTree {
        Note : Here all points are vertices - and there is an edge between all of them - this is a fully connected graph. It makes more sense to perform Prim's for adjacency matrix here
        as V^2 will be less than number of 2*Edges.
        TODO: Implement Prim's algorithm for adjacency matrix.
-
      */
     public int minCostConnectPoints(int[][] points) {
         ArrayList<ArrayList<ArrayList<Integer>>> graph = new ArrayList<>();

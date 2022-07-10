@@ -1,5 +1,7 @@
 package PopularProblemsGroup;
 
+import java.util.*;
+
 public class BestTimeToBuyAndSellStocks {
     public static void main(String[] args) {
 
@@ -190,8 +192,8 @@ public class BestTimeToBuyAndSellStocks {
        https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iv/
 
        I hate this problem - I could not find an optimized way for memo solution - because we are not filling our table serially - which is required for optimized solution.
-       Time complexity for memo - O(N^2k)
-       Time complexity for Tabulation - O(Nk)
+       Time complexity for memo - O(N^2.k)
+       Time complexity for Tabulation - O(N.k)
 
        Here our cache table stores - for a given day and number of transactions allowed what could be my max profit
        Tabulation approach with optimization - https://www.youtube.com/watch?v=3YILP-PdEJA
@@ -207,7 +209,7 @@ public class BestTimeToBuyAndSellStocks {
         Integer[][] memo = new Integer[prices.length][k + 1];
         Integer[][] dpTable = new Integer[k+1][prices.length];
         int maxProfit = 0;
-        //Give me maxProfit taking all days and k transactions
+        //Give me maxProfit on last day with k transactions
         maxProfit =  maxProfitKTransactionsMemo(prices, prices.length - 1, k, memo);
         maxProfit = maxProfitKTransactionsTabulation(k,prices,dpTable);
 
@@ -224,7 +226,7 @@ public class BestTimeToBuyAndSellStocks {
         //Don't do any transaction today - will same as previous day with k transactions left
         int noTransactionToday = maxProfitKTransactionsMemo(prices, day - 1, k, memo);
         //I sell today - means using up 1 transaction
-        //To sell today - I have to buy at some previous day - means loss of that day price - minimize this loss -> pick a day with the least loss : pDay max profit - prices[pDay]
+        //To sell today - I have to buy at some previous day - means loss of that day price -> minimize this loss -> pick a day with the least loss : pDay max profit - prices[pDay]
         int transactionToday = Integer.MIN_VALUE;
         //Checking the least loss for all possible previous days with k-1 transactions - This could be optimized in tabulation method
         for(int pDay = 0; pDay < day; pDay++){
@@ -256,6 +258,5 @@ public class BestTimeToBuyAndSellStocks {
         }
         return dpTable[k][prices.length - 1];
     }
-
 
 }

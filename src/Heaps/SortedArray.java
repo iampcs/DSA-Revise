@@ -9,7 +9,6 @@ Most of these problems can be also solved with NonSortedArray methods, but we ca
 */
 public class SortedArray {
     public static void main(String[] args) {
-
     }
 
     /* Sort a K-Sorted/Nearly sorted Array
@@ -19,6 +18,7 @@ public class SortedArray {
     {
         // As a number can be atmost K away from its original position, we will create a minHeap of sizeK
         // Will keep adding elements to it minHeap and poll when size crosses K.
+        //Complexity with normal sorting - O(NlogN) - with heap - O(NlogK)
         PriorityQueue<Integer> minHeap = new PriorityQueue<>();
         int index = 0;
 
@@ -205,11 +205,13 @@ public class SortedArray {
     Approach will be similar to mergeKLists :
     1. Insert first element of each list to a minHeap.
     2. Keep track of current maximum number among all the numbers inside heap - currentMaxNumber
-    3. While our heap size is same as nums size - If our heap size is less than nums size, we are not considering a list for our solution,
-    so we end as soon as our minHeap size is less than nums size.
+    3. Because at all time our heap will contain 1 element from each list - we will have the minimum among them on top
+       and keeping track of max number in heap - we will have a range - just keep removing elements from heap and updating range
+       While our heap size is same as nums size - If our heap size is less than nums size, one of out list is over - so our range can't go beyond
+       that list's last element - so we end as soon as our minHeap size is less than nums size.
         3.1. Poll minHeap
         3.2. Check if this number and currentMaxNumber forms a new solution
-        3.3. Add new element from polled list
+        3.3. Add next element from polled list, if exists
      */
     public static int[] smallestRange(List<List<Integer>> nums) {
         //int[0] = num, int[1] = elementIndex, int[2] = arrayIndex
@@ -225,6 +227,7 @@ public class SortedArray {
         }
 
         while(minHeap.size() == nums.size()){
+            //This element will be the current minimum
             int[] currElement = minHeap.poll();
             //We have found a smaller range
             if(rangeEnd - rangeStart > currentMaximumNumber - currElement[0]){
@@ -234,8 +237,11 @@ public class SortedArray {
 
             //Add next indexed number from same list as currElement - check if this new number is currentMaximumNumber
             currElement[1] += 1;
+            // If there are numbers left from polled element's list
             if(nums.get(currElement[2]).size() > currElement[1]){
+                //Add next number from that list to our minHeap
                 minHeap.add(new int[] {nums.get(currElement[2]).get(currElement[1]), currElement[1] , currElement[2]});
+                //Update currentMaxNumber if this new number is greater than existing number
                 currentMaximumNumber = Math.max(currentMaximumNumber, nums.get(currElement[2]).get(currElement[1]));
             }
 
@@ -248,6 +254,10 @@ public class SortedArray {
     Find K Pairs with Smallest Sums - Given two sorted arrays in ascending order ,
     find ‘K’ pairs with the smallest sum where each pair consists of numbers from both the arrays.
     https://leetcode.com/problems/find-k-pairs-with-smallest-sums/
+    Ex. Input: nums1 = [1,7,11], nums2 = [2,4,6], k = 3
+    Output: [[1,2],[1,4],[1,6]]
+    Explanation: The first 3 pairs are returned from the sequence: [1,2],[1,4],[1,6],[7,2],[7,4],[11,2],[7,6],[11,4],[11,6]
+
     A straight forward solution will be - We can go through all the numbers of the two input arrays to create pairs and
     initially insert them all in the maxHeap until we have ‘K’ pairs. After that, if a pair is smaller than the top (largest) pair in the maxHeap,
     we can replace top with this new pair.
@@ -290,4 +300,5 @@ public class SortedArray {
         }
         return solution;
     }
+
 }

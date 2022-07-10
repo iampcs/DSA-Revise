@@ -1,10 +1,10 @@
 package Tree;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class DepthFirstSearch {
+
 
     class TreeNode {
         int val;
@@ -116,12 +116,12 @@ public class DepthFirstSearch {
               When I say max sum path - means it's an upper semi eclipse, it goes from left to right and includes current root - leftChain + rightChain + root.value
 
      */
-    public static int[] maxSumPath = new int[1];
+    public static int maxSumPath;
     public int maxPathSum(TreeNode root) {
         //Storing the root as maxPathSum - this will be the case if tree has only node.
-        maxSumPath[0] = root.val;
+        maxSumPath = root.val;
         maxPathSumDFS(root);
-        return maxSumPath[0];
+        return maxSumPath;
     }
 
     //int[0] : contains max sum path of left subtree , int[1] : contains sum of maximum path
@@ -138,7 +138,7 @@ public class DepthFirstSearch {
         rightChain = Math.max(rightChain, 0);
 
         //Do we have a new max sum path ?
-        maxSumPath[0] = Math.max(maxSumPath[0], leftChain + rightChain + root.val);
+        maxSumPath = Math.max(maxSumPath, leftChain + rightChain + root.val);
 
         // Return max chain from this current root
         return root.val + Math.max(leftChain,rightChain);
@@ -229,6 +229,7 @@ public class DepthFirstSearch {
 
     private int pathSumFrom(TreeNode node, int sum) {
         if (node == null) return 0;
+        //Tree contains negative values - So even if we found a path - its possible going forward we could discover more such paths
         return (node.val == sum ? 1 : 0)
                 + pathSumFrom(node.left, sum - node.val) + pathSumFrom(node.right, sum - node.val);
     }
@@ -277,7 +278,7 @@ public class DepthFirstSearch {
     /* Sum Root to Leaf Numbers - You are given the root of a binary tree containing digits from 0 to 9 only.Each root-to-leaf path in the tree represents a number.
        For example, the root-to-leaf path 1 -> 2 -> 3 represents the number 123.
        Return the total sum of all root-to-leaf numbers. Test cases are generated so that the answer will fit in a 32-bit integer.
-
+       https://leetcode.com/problems/sum-root-to-leaf-numbers/
        Logic is simple - We pass current node value to left child and right child : If path 1->2 - We will pass 12 to both the child
        When we encounter a leaf - will add this path to sum.
 

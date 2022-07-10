@@ -16,30 +16,20 @@ Scenario : Suppose we need Kth largest element. We have two choice
         Complexity - N * logK(Heapify - adding/removing/updating an element from heap of size k takes logK time)
 */
 
-
-import javax.swing.text.html.parser.Entity;
 import java.util.*;
 
 public class NonSortedArray {
     public static void main(String[] args) {
 
-        FreqStack freqStack = new FreqStack();
-        freqStack.push(5); // The stack is [5]
-        freqStack.push(7); // The stack is [5,7]
-        freqStack.push(5); // The stack is [5,7,5]
-        freqStack.push(7); // The stack is [5,7,5,7]
-        freqStack.push(4); // The stack is [5,7,5,7,4]
-        freqStack.push(5); // The stack is [5,7,5,7,4,5]
-        freqStack.pop();   // return 5, as 5 is the most frequent. The stack becomes [5,7,5,7,4].
-        freqStack.pop();   // return 7, as 5 and 7 is the most frequent, but 7 is closest to the top. The stack becomes [5,7,5,4].
-        freqStack.pop();   // return 5, as 5 is the most frequent. The stack becomes [5,7,4].
-        freqStack.pop();   // return 4, as 4, 5 and 7 is the most frequent, but 4 is closest to the top. The stack becomes [5,7].
     }
 
     /*
     Given the array of integers nums, you will choose two different indices i and j of that array.
     Return the maximum value of (nums[i]-1)*(nums[j]-1)
     https://leetcode.com/problems/maximum-product-of-two-elements-in-an-array/
+    Input: nums = [3,4,5,2]
+    Output: 12
+    Explanation: If you choose the indices i=1 and j=2 (indexed from 0), you will get the maximum value, that is, (nums[1]-1)*(nums[2]-1) = (4-1)*(5-1) = 3*4 = 12.
      */
     public static int maxProduct(int[] nums) {
         //Using minHeap as we need largest and 2nd largest elements from array
@@ -165,7 +155,8 @@ public class NonSortedArray {
     }
 
     /*
-    Top K Frequent Elements - https://leetcode.com/problems/top-k-frequent-elements/
+    Top K Frequent Elements - Given an integer array nums and an integer k, return the k most frequent elements. You may return the answer in any order.
+    https://leetcode.com/problems/top-k-frequent-elements/
     Will use a HashMap to create a frequencyMap - then use a minHeap to return top K frequent elements - N + NlogK
      */
     public static int[] topKFrequent(int[] nums, int k) {
@@ -229,6 +220,10 @@ public class NonSortedArray {
     }
     /*
         Least Number of Unique Integers after K Removals
+        Given an array of integers arr and an integer k. Find the least number of unique integers after removing exactly k elements.
+        Input: arr = [5,5,4], k = 1
+        Output: 1
+        Explanation: Remove the single 4, only 5 is left.
         https://leetcode.com/problems/least-number-of-unique-integers-after-k-removals/
     */
     public static int findLeastNumOfUniqueInts(int[] arr, int k) {
@@ -328,8 +323,17 @@ public class NonSortedArray {
     }
     /*
     Task Scheduler
+    Given a characters array tasks, representing the tasks a CPU needs to do, where each letter represents a different task. Tasks could be done in any order.
+    Each task is done in one unit of time. For each unit of time, the CPU could complete either one task or just be idle.
+    However, there is a non-negative integer n that represents the cooldown period between two same tasks (the same letter in the array), that is that there must be at
+    least n units of time between any two same tasks.
+    Return the least number of units of times that the CPU will take to finish all the given tasks.
+    Input: tasks = ["A","A","A","B","B","B"], k = 2
+    Output: 8
+    Explanation: A -> B -> idle -> A -> B -> idle -> A -> B
+    There is at least 2 units of time between any two same tasks.
     https://leetcode.com/problems/task-scheduler/
-    This problem is similar to rearrangeString. We need to rearrange tasks such that same tasks are ‘K’ distance apart.
+    This problem is similar to rearrangeString. We need to rearrange tasks such that same tasks are ‘k’ distance apart.
     We will use a maxHeap to execute the highest frequency task first. After executing a task we decrease its frequency and put it in a
     waiting list. In each iteration, we will try to execute as many as k+1 tasks.
     For the next iteration, we will put all the waiting tasks back in the maxHeap.
@@ -356,7 +360,7 @@ public class NonSortedArray {
                 Map.Entry<Character,Integer> currEntry = maxHeap.poll();
                 //Add it to solution
                 solution++;
-                //Only if frequency is left we are interested in it
+                //Only if frequency is left post adding we are interested in it
                 if(currEntry.getValue() > 1){
                     //Reduce frequency by 1, as we have used it in our solution
                     currEntry.setValue(currEntry.getValue() - 1);
@@ -367,6 +371,8 @@ public class NonSortedArray {
             // Add all coolDown characters back to maxHeap as they are eligible to add back to schedule
             maxHeap.addAll(coolDownList);
             // We could not add fill K+1 places from maxHeap, we will be having leftover 'n' idle intervals for next iterations
+            // We don't have anything left in coolDownList means we have successfully scheduled all tasks - maxHeap will be empty in that case
+            // No need to add 'n' - idle states after that
             if(!maxHeap.isEmpty()) solution += n;
         }
         return solution;

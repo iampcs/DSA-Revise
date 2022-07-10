@@ -45,7 +45,7 @@ public class DisjointSets {
 
     }
 
-    class UnionFind {
+    static class UnionFind {
         // The disjoint set data structure can be implemented using a Parent array representation.
         // The i’th element of the array is the parent of the i’th item.
         int vertices;
@@ -122,34 +122,7 @@ public class DisjointSets {
     }
 
 
-    /* Kruskal’s Algorithm for finding Minimum Spanning Tree - Greedy algorithm to find MST. This uses disjointSets to determine if there is a cycle in a graph, if not adds that edge to solution
-       Algorithm :
-       1. Sort edges based on weight - can sort whole array or use a minHeap of size V-1 to get smallest edge
-       2. Pick an edge - check if adding this edge can cause a cycle in graph - if not - add to MST, else skip
-       3. Repeat 2 until we have V-1 edges.
-       Visual Representation - https://www.techiedelight.com/kruskals-algorithm-for-finding-minimum-spanning-tree/
-       https://techiedelight.com/practice/?problem=MinimumSpanningTree
-
-     */
-    public Set<Edge> constructMinimumSpanningTree(List<Edge> edges, int V) {
-        Set<Edge> mst = new HashSet<>();
-        UnionFind unionFind = new UnionFind(V);
-        Collections.sort(edges, Comparator.comparingInt(a -> a.weight));
-        Iterator<Edge> edgeIterator = edges.iterator();
-        //We want to stop if there are no more edges left, or we have already picked up V-1 edges
-        while (edgeIterator.hasNext() && mst.size() < V) {
-            Edge currEdge = edgeIterator.next();
-            //A cycle will form if we add this edge - Skip
-            if (unionFind.isCycle(currEdge.source, currEdge.dest)) continue;
-            //Do a union of vertices - add this edge to mst
-            unionFind.unionByRank(currEdge.source, currEdge.dest);
-            mst.add(currEdge);
-        }
-
-        return mst.size() == V - 1 ? mst : null;
-    }
-
-    class Edge {
+    static class Edge {
         int source, dest, weight;
 
         public Edge(int source, int dest, int weight) {

@@ -198,4 +198,37 @@ public class VariableWindowSize {
         return solutionStart == -1 ? "" : s.substring(solutionStart,endSolution+1);
 
     }
+    /* Longest Repeating Character Replacement - You are given a string s and an integer k. You can choose any character of the string and change it to any other uppercase
+       English character. You can perform this operation at most k times.Return the length of the longest substring containing the same letter you can get after performing
+       the above operations.
+       Input: s = "ABAB", k = 2
+       Output: 4
+       Explanation: Replace the two 'A's with two 'B's or vice versa.
+       https://leetcode.com/problems/longest-repeating-character-replacement/
+
+       Algorithm used here - https://www.youtube.com/watch?v=gqXU1UyA8pk
+       */
+    public int characterReplacement(String s, int k) {
+        int solution = 0;
+        int[] charMap = new int[26];
+        char[] charS = s.toCharArray();
+        int maxFreq = 0;
+        int start = 0;
+
+         for(int end = 0; end < charS.length; end++ ){
+            charMap[charS[end] - 'A']++;
+            maxFreq = Math.max(maxFreq, charMap[charS[end] - 'A']);
+
+            //Why are we not decreasing maxFreq when we are decreasing window length ?
+             // Because it doesn't matter - when we are reducing the window length - we won't get a new solution
+            while (end - start + 1 - maxFreq > k){
+                charMap[charS[start] - 'A']--;
+                start++;
+            }
+
+            solution = Math.max(solution, end - start + 1);
+        }
+
+        return solution;
+    }
 }

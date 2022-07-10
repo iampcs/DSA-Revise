@@ -106,9 +106,7 @@ public class LongestCommonSubsequence {
         return dpTable[N][M];
     }
 
-    /* We get dpTable as input from longestCommonSubsequenceTabulation - Backtrack from solution cell - dpTable[N][M]
-
-     */
+    /* We get dpTable as input from longestCommonSubsequenceTabulation - Backtrack from solution cell - dpTable[N][M] */
     public static String printSubsequence(String S1, int N, String S2, int M, Integer[][] dpTable){
         StringBuilder solution = new StringBuilder();
 
