@@ -74,7 +74,7 @@ public class BestTimeToBuyAndSellStocks {
        States are :
             1. On ith day - I am holding a share
             2. On ith day - I am not holding a share
-       First thing that comes to mind during a recursive solution is on ith day, I buy a share of sell a share - but then we have to keep a track of buying and profit
+       First thing that comes to mind during a recursive solution is on ith day, I buy a share or sell a share - but then we have to keep a track of buying and profit
        separately and pass it as function - designing solutions based on states helps writing DP solutions as we just add/subtract to previous state to reach current state.
 
        I am solving this using memo method - as that more intuitive to me - from a recursive brute to memo.
@@ -103,7 +103,7 @@ public class BestTimeToBuyAndSellStocks {
         //If I am holding a stock on index day
         if(hasStock){
             //It's only possible if
-            //I bought it today only - In that case my profit is - profit I made till yesterday - money I spend to buy this stock today
+            //I bought it today only - In that case my profit is : profit I made till yesterday - money I spend to buy this stock today
             int boughtToday = maxProfitTransactionFee(prices, index - 1, fee, false, memo) - prices[index] - fee;
             //I had this stock yesterday - profit same as yesterday
             int carryForward = maxProfitTransactionFee(prices, index - 1, fee, true, memo);

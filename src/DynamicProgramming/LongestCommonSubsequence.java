@@ -144,7 +144,7 @@ public class LongestCommonSubsequence {
        0 1 2 3 4 5
        A A B D C C  - i
        A A B D C C  - ii
-       LCS - AABACC as all characters are matching
+       LCS - AABDCC as all characters are matching
        LRS - AC -   i(0) - ii(1),ii(3)  - Set 1 - A
                     i(1) - ii(0),ii(3)  - Set 2 - A
                     i(2) - Nothing
@@ -278,7 +278,7 @@ public class LongestCommonSubsequence {
                 //But there could be a chance if adding one will do. In that case we check addling which one will give us the minimum length
                 //Eg. ABCD - S1 , ABD - S2
                 // SCS - Till AB it will add to solution as characters are same. But at index 2, we have C & D. We can either add both C & D
-                // to pur solution and move to index 3 - but this will increase the SCS length - So we are not even considering this option
+                // to our solution and move to index 3 - but this will increase the SCS length - So we are not even considering this option
                 //We have two options
                 //We can add only C to SCS and check if D is taken care of in future - As we add a character we add 1
                 //We can add only D to SCS and check if C is taken care of in future - As we add a character we add 1

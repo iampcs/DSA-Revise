@@ -7,7 +7,7 @@ public class DataStructureUsingLinkedList {
     public static void main(String[] args) {
 
     }
-    class DoubleLinkedList{
+    static class DoubleLinkedList{
         int key;
         int value;
         DoubleLinkedList prev;
@@ -33,9 +33,10 @@ public class DataStructureUsingLinkedList {
     class LRUCache {
         Map<Integer,DoubleLinkedList> cache;
         private int currentSize;
-        private int capacity;
+        private final int capacity;
         //Dummy nodes to keep track of least recently used and most recently used
-        private DoubleLinkedList leastRecentlyUsed, mostRecentlyUsed;
+        private final DoubleLinkedList leastRecentlyUsed;
+        private final DoubleLinkedList mostRecentlyUsed;
         public LRUCache(int capacity) {
             this.capacity = capacity;
             currentSize = 0;
@@ -92,7 +93,7 @@ public class DataStructureUsingLinkedList {
             //Not present
             else {
                 //Add to cache and list - make it most recently used
-                DoubleLinkedList newNode = new DoubleLinkedList(key,value);
+                DoubleLinkedList newNode = new DoubleLinkedList(key, value);
                 this.addToList(newNode);
                 this.cache.put(key,newNode);
                 currentSize += 1;
